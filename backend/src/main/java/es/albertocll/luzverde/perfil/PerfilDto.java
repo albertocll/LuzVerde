@@ -12,6 +12,18 @@ import java.util.List;
  * En el PUT, las listas sustituyen a las anteriores.
  */
 public record PerfilDto(
+        @Size(max = 150)
+        String titular,
+
+        @Size(max = 30)
+        String telefono,
+
+        @Size(max = 200)
+        String linkedin,
+
+        @Size(max = 200)
+        String github,
+
         @Min(value = 0, message = "El salario no puede ser negativo")
         @Max(value = 1_000_000)
         Integer salarioMinimo,
@@ -28,11 +40,15 @@ public record PerfilDto(
         @Size(max = 20) List<@Valid Idioma> idiomas) {
 
     static PerfilDto vacio() {
-        return new PerfilDto(null, null, null, List.of(), List.of(), List.of(), List.of(), List.of());
+        return new PerfilDto(null, null, null, null, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of());
     }
 
     static PerfilDto de(Perfil p) {
         return new PerfilDto(
+                p.getTitular(),
+                p.getTelefono(),
+                p.getLinkedin(),
+                p.getGithub(),
                 p.getSalarioMinimo(),
                 p.getModalidad(),
                 p.getUbicacion(),

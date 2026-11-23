@@ -29,9 +29,13 @@ public class PerfilService {
         Perfil perfil = perfiles.findByUsuarioId(usuarioId)
                 .orElseGet(() -> perfiles.save(new Perfil(usuarios.getReferenceById(usuarioId))));
 
+        perfil.setTitular(limpio(datos.titular()));
+        perfil.setTelefono(limpio(datos.telefono()));
+        perfil.setLinkedin(limpio(datos.linkedin()));
+        perfil.setGithub(limpio(datos.github()));
         perfil.setSalarioMinimo(datos.salarioMinimo());
         perfil.setModalidad(datos.modalidad());
-        perfil.setUbicacion(datos.ubicacion() == null || datos.ubicacion().isBlank() ? null : datos.ubicacion().trim());
+        perfil.setUbicacion(limpio(datos.ubicacion()));
         reemplazar(perfil.getTecnologias(), datos.tecnologias());
         reemplazar(perfil.getExperiencias(), datos.experiencias());
         reemplazar(perfil.getFormaciones(), datos.formaciones());
@@ -40,6 +44,10 @@ public class PerfilService {
 
         perfiles.flush();
         return PerfilDto.de(perfil);
+    }
+
+    private static String limpio(String texto) {
+        return texto == null || texto.isBlank() ? null : texto.trim();
     }
 
     private static <T> void reemplazar(List<T> actual, List<T> nueva) {

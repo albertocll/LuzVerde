@@ -31,6 +31,19 @@ public class Perfil {
     @JoinColumn(name = "usuario_id", nullable = false, unique = true)
     private Usuario usuario;
 
+    /** Línea bajo el nombre en el CV, por ejemplo "Desarrollador full stack junior". */
+    @Column(length = 150)
+    private String titular;
+
+    @Column(length = 30)
+    private String telefono;
+
+    @Column(length = 200)
+    private String linkedin;
+
+    @Column(length = 200)
+    private String github;
+
     /** Salario mínimo aceptable, en euros brutos al año. */
     @Column(name = "salario_minimo")
     private Integer salarioMinimo;
@@ -80,6 +93,38 @@ public class Perfil {
 
     public Usuario getUsuario() {
         return usuario;
+    }
+
+    public String getTitular() {
+        return titular;
+    }
+
+    public void setTitular(String titular) {
+        this.titular = titular;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public String getLinkedin() {
+        return linkedin;
+    }
+
+    public void setLinkedin(String linkedin) {
+        this.linkedin = linkedin;
+    }
+
+    public String getGithub() {
+        return github;
+    }
+
+    public void setGithub(String github) {
+        this.github = github;
     }
 
     public Integer getSalarioMinimo() {
