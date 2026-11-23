@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: luz-verde
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/luzverde}
+    username: ${DB_USER:luzverde}
+    password: ${DB_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: ${PORT:8080}
+
+luzverde:
+  jwt:
+    # Clave en Base64 de al menos 32 bytes. Solo por variable de entorno.
+    secreto: ${JWT_SECRET}
+    expiracion-minutos: ${JWT_EXPIRACION_MINUTOS:1440}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
