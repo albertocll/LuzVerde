@@ -66,11 +66,25 @@ Todas las rutas salvo `/auth/**` y Swagger piden la cabecera `Authorization: Bea
 | PUT | `/candidaturas/{id}` | Actualiza una candidatura |
 | DELETE | `/candidaturas/{id}` | Borra una candidatura |
 | GET | `/perfil` | Tu perfil (vacío si no lo has rellenado) |
+| POST | `/evaluaciones` | Evalúa una oferta con IA y devuelve semáforo, pros, huecos, banderas rojas y acción recomendada |
+| GET | `/evaluaciones` | Tus últimas evaluaciones |
+| GET | `/evaluaciones/{id}` | Detalle de una evaluación |
 | PUT | `/perfil` | Crea o sustituye tu perfil |
 
 Estados de una candidatura: `PENDIENTE`, `ENVIADA`, `ESPERANDO_RESPUESTA`, `ENTREVISTA`, `DESCARTADA`.
 
 El perfil guarda el stack con su nivel (`SOLIDO`, `MEDIO`, `SIN_TOCAR`), el salario mínimo en euros brutos al año, la modalidad (`PRESENCIAL`, `HIBRIDO`, `REMOTO`), la ubicación, la experiencia, la formación, los proyectos y los idiomas. Las fechas de experiencia y formación van en formato `AAAA-MM`.
+
+## evaluador de ofertas
+
+`POST /evaluaciones` recibe el texto de una oferta, lo compara con tu perfil usando la API de Claude y devuelve un semáforo (`VERDE`, `AMARILLO` o `ROJO`) con pros, huecos, banderas rojas y la acción recomendada.
+
+- La clave de la API vive solo en la variable de entorno `ANTHROPIC_API_KEY` del servidor. La app nunca la ve.
+- Sin clave, el resto de la API funciona y el evaluador responde 503.
+- Límite de 10 usos de IA por usuario y día (hora de Madrid) y tope de tokens por llamada.
+- Modelo por defecto: `claude-haiku-5-5`, el más pequeño de la familia actual. Se cambia con `ANTHROPIC_MODELO`.
+- El modelo responde llamando a una herramienta con un esquema JSON fijo, así la salida siempre tiene la misma forma.
+- Los tests simulan la API y no gastan créditos.
 
 Cada usuario solo ve y modifica sus datos. Si pides una candidatura de otro usuario, la API responde 404, igual que si no existiera.
 
@@ -84,13 +98,17 @@ Cada usuario solo ve y modifica sus datos. Si pides una candidatura de otro usua
 | `JWT_SECRET` | Sí | Clave en Base64 de al menos 32 bytes para firmar los tokens |
 | `JWT_EXPIRACION_MINUTOS` | No | Duración del token. Por defecto 1440 (un día) |
 | `PORT` | No | Puerto HTTP. Por defecto 8080 |
+| `ANTHROPIC_API_KEY` | Para usar la IA | Clave de la API de Claude |
+| `ANTHROPIC_MODELO` | No | Modelo. Por defecto `claude-haiku-5-5` |
+| `ANTHROPIC_MAX_TOKENS` | No | Tope de tokens de salida por llamada. Por defecto 2048 |
+| `LIMITE_IA_DIARIO` | No | Usos de IA por usuario y día. Por defecto 10 |
 
 Ningún secreto vive en el repositorio.
 
 ## fases
 
 - [x] Fase 1. Backend base: registro y login, candidaturas, perfil, tests y Swagger.
-- [ ] Fase 2. Evaluador de ofertas con la API de Claude.
+- [x] Fase 2. Evaluador de ofertas con la API de Claude.
 - [ ] Fase 3. Generador de CV compatible con ATS.
 - [ ] Fase 4. App React Native.
 - [ ] Fase 5. Despliegue en Railway.

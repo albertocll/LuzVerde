@@ -1,5 +1,8 @@
 package es.albertocll.luzverde.error;
 
+import es.albertocll.luzverde.ia.IaException;
+import es.albertocll.luzverde.ia.IaNoConfiguradaException;
+import es.albertocll.luzverde.ia.LimiteSuperadoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -27,6 +30,21 @@ public class ManejadorErrores {
     @ExceptionHandler(CredencialesInvalidasException.class)
     public ProblemDetail credenciales(CredencialesInvalidasException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, e.getMessage());
+    }
+
+    @ExceptionHandler(LimiteSuperadoException.class)
+    public ProblemDetail limite(LimiteSuperadoException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, e.getMessage());
+    }
+
+    @ExceptionHandler(IaNoConfiguradaException.class)
+    public ProblemDetail iaNoConfigurada(IaNoConfiguradaException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
+    }
+
+    @ExceptionHandler(IaException.class)
+    public ProblemDetail ia(IaException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_GATEWAY, e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

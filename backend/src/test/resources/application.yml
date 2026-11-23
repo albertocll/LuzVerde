@@ -13,3 +13,9 @@ luzverde:
     # Clave falsa solo para tests. No se usa en ningún entorno real.
     secreto: dGVzdC1zb2xvLXBhcmEtdGVzdHMtbm8tdXNhci1lbi1wcm9kdWNjaW9uLTEyMzQ1Njc4
     expiracion-minutos: 60
+  claude:
+    api-key: clave-falsa-de-test
+    modelo: modelo-de-test
+    max-tokens: 2048
+    url: http://localhost:9/no-se-usa
+    limite-diario: 10
