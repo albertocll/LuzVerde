@@ -33,6 +33,9 @@ management:
       show-details: never
 
 luzverde:
+  app:
+    # Versión mínima de la app (formato 1.2.3). Si la instalada es menor, la app pide actualizar.
+    version-minima: ${APP_VERSION_MINIMA:1.0.0}
   jwt:
     # Clave en Base64 de al menos 32 bytes. Solo por variable de entorno.
     secreto: ${JWT_SECRET}

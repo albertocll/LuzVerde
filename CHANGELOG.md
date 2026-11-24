@@ -10,6 +10,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 - README con mockup, capturas y diagrama de arquitectura.
 - GIF de la demo, CV en PDF de ejemplo, Swagger UI e informe de cobertura en el README.
 - Borrar la cuenta y todos sus datos desde Perfil (`DELETE /api/v1/cuenta`). El token de una cuenta borrada deja de valer.
+- Aviso de "Hay una versión nueva" cuando la app es más antigua que `APP_VERSION_MINIMA` (`GET /api/v1/version`).
 
 - Límite de intentos de login: 5 fallos por email o 20 por IP en 15 minutos.
 - Endpoint `/actuator/health` para el despliegue.
