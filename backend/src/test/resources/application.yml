@@ -19,3 +19,10 @@ luzverde:
     max-tokens: 2048
     url: http://localhost:9/no-se-usa
     limite-diario: 10
+
+# Igual que en producción: Swagger apagado salvo que se active.
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:false}
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:false}

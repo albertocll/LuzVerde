@@ -46,6 +46,10 @@ luzverde:
     url: https://api.anthropic.com/v1/messages
     limite-diario: ${LIMITE_IA_DIARIO:10}
 
+# Swagger solo se activa a propósito (Docker Compose local lo hace). En producción queda apagado.
 springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:false}
   swagger-ui:
+    enabled: ${SWAGGER_ENABLED:false}
     path: /swagger-ui.html
