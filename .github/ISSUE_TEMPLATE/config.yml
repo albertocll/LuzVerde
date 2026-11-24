@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Informar de un fallo de seguridad
-    url: https://github.com/albertocll/luz-verde/security/advisories/new
+    url: https://github.com/albertocll/LuzVerde/security/advisories/new
     about: Hazlo en privado, no en un issue público.
