@@ -40,11 +40,14 @@ const MENSAJES: Record<number, string> = {
   503: 'El servidor no tiene la IA configurada todavía.',
 };
 
+/** Versión de la API. Las rutas de abajo son relativas a ella. */
+export const PREFIJO_API = '/api/v1';
+
 async function peticion<T>(ruta: string, opciones: RequestInit = {}): Promise<T> {
   const base = await cargarUrlServidor();
   let respuesta: Response;
   try {
-    respuesta = await fetch(`${base}${ruta}`, {
+    respuesta = await fetch(`${base}${PREFIJO_API}${ruta}`, {
       ...opciones,
       headers: {
         Accept: 'application/json',

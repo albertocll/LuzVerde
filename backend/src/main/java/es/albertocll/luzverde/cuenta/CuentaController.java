@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/cuenta")
+@RequestMapping("/api/v1/cuenta")
 @Tag(name = "Cuenta")
 public class CuentaController {
 

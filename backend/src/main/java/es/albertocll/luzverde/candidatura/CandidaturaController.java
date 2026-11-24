@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/candidaturas")
+@RequestMapping("/api/v1/candidaturas")
 @Tag(name = "Candidaturas")
 public class CandidaturaController {
 

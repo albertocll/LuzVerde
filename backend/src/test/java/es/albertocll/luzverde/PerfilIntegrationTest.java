@@ -42,7 +42,7 @@ class PerfilIntegrationTest extends TestBase {
     @Test
     void perfilNuevoEstaVacio() throws Exception {
         String token = registrar();
-        mvc.perform(get("/perfil").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+        mvc.perform(get("/api/v1/perfil").header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.salarioMinimo").doesNotExist())
                 .andExpect(jsonPath("$.tecnologias", hasSize(0)));
@@ -51,13 +51,13 @@ class PerfilIntegrationTest extends TestBase {
     @Test
     void guardaYDevuelveElPerfil() throws Exception {
         String token = registrar();
-        mvc.perform(put("/perfil")
+        mvc.perform(put("/api/v1/perfil")
                         .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(PERFIL))
                 .andExpect(status().isOk());
 
-        mvc.perform(get("/perfil").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+        mvc.perform(get("/api/v1/perfil").header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.salarioMinimo").value(20000))
                 .andExpect(jsonPath("$.modalidad").value("HIBRIDO"))
@@ -73,11 +73,11 @@ class PerfilIntegrationTest extends TestBase {
     @Test
     void segundoPutSustituyeLasListas() throws Exception {
         String token = registrar();
-        mvc.perform(put("/perfil").header(HttpHeaders.AUTHORIZATION, bearer(token))
+        mvc.perform(put("/api/v1/perfil").header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .contentType(MediaType.APPLICATION_JSON).content(PERFIL))
                 .andExpect(status().isOk());
 
-        mvc.perform(put("/perfil").header(HttpHeaders.AUTHORIZATION, bearer(token))
+        mvc.perform(put("/api/v1/perfil").header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"salarioMinimo": 22000, "tecnologias": [{"nombre": "Docker", "nivel": "MEDIO"}]}
@@ -92,11 +92,11 @@ class PerfilIntegrationTest extends TestBase {
     void elPerfilEsPrivado() throws Exception {
         String ana = registrar();
         String luis = registrar();
-        mvc.perform(put("/perfil").header(HttpHeaders.AUTHORIZATION, bearer(ana))
+        mvc.perform(put("/api/v1/perfil").header(HttpHeaders.AUTHORIZATION, bearer(ana))
                         .contentType(MediaType.APPLICATION_JSON).content(PERFIL))
                 .andExpect(status().isOk());
 
-        mvc.perform(get("/perfil").header(HttpHeaders.AUTHORIZATION, bearer(luis)))
+        mvc.perform(get("/api/v1/perfil").header(HttpHeaders.AUTHORIZATION, bearer(luis)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tecnologias", hasSize(0)));
     }
@@ -104,7 +104,7 @@ class PerfilIntegrationTest extends TestBase {
     @Test
     void rechazaDatosMalos() throws Exception {
         String token = registrar();
-        mvc.perform(put("/perfil").header(HttpHeaders.AUTHORIZATION, bearer(token))
+        mvc.perform(put("/api/v1/perfil").header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"salarioMinimo": -5,
@@ -112,7 +112,7 @@ class PerfilIntegrationTest extends TestBase {
                                 """))
                 .andExpect(status().isBadRequest());
 
-        mvc.perform(put("/perfil").header(HttpHeaders.AUTHORIZATION, bearer(token))
+        mvc.perform(put("/api/v1/perfil").header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"tecnologias": [{"nombre": "Java", "nivel": "EXPERTO"}]}

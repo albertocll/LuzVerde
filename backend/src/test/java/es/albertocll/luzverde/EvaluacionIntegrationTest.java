@@ -63,7 +63,7 @@ class EvaluacionIntegrationTest extends TestBase {
     void devuelveSemaforoProsHuecosYAccion() throws Exception {
         String token = registrar();
 
-        mvc.perform(post("/evaluaciones")
+        mvc.perform(post("/api/v1/evaluaciones")
                         .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo(OFERTA)))
@@ -76,7 +76,7 @@ class EvaluacionIntegrationTest extends TestBase {
                 .andExpect(jsonPath("$.accionRecomendada", containsString("Aplica")))
                 .andExpect(jsonPath("$.usosRestantesHoy").value(9));
 
-        mvc.perform(get("/evaluaciones").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+        mvc.perform(get("/api/v1/evaluaciones").header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].semaforo").value("VERDE"));
@@ -85,14 +85,14 @@ class EvaluacionIntegrationTest extends TestBase {
     @Test
     void enviaElPerfilDelUsuarioALaIa() throws Exception {
         String token = registrar();
-        mvc.perform(put("/perfil").header(HttpHeaders.AUTHORIZATION, bearer(token))
+        mvc.perform(put("/api/v1/perfil").header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"salarioMinimo": 20000, "tecnologias": [{"nombre": "Spring Boot", "nivel": "SOLIDO"}]}
                                 """))
                 .andExpect(status().isOk());
 
-        mvc.perform(post("/evaluaciones")
+        mvc.perform(post("/api/v1/evaluaciones")
                         .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo(OFERTA)))
@@ -106,14 +106,14 @@ class EvaluacionIntegrationTest extends TestBase {
     void limiteDeDiezAlDia() throws Exception {
         String token = registrar();
         for (int i = 0; i < 10; i++) {
-            mvc.perform(post("/evaluaciones")
+            mvc.perform(post("/api/v1/evaluaciones")
                             .header(HttpHeaders.AUTHORIZATION, bearer(token))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(cuerpo(OFERTA)))
                     .andExpect(status().isCreated());
         }
 
-        mvc.perform(post("/evaluaciones")
+        mvc.perform(post("/api/v1/evaluaciones")
                         .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo(OFERTA)))
@@ -121,7 +121,7 @@ class EvaluacionIntegrationTest extends TestBase {
                 .andExpect(jsonPath("$.detail", containsString("10")));
 
         // Otro usuario tiene su propio contador.
-        mvc.perform(post("/evaluaciones")
+        mvc.perform(post("/api/v1/evaluaciones")
                         .header(HttpHeaders.AUTHORIZATION, bearer(registrar()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo(OFERTA)))
@@ -130,7 +130,7 @@ class EvaluacionIntegrationTest extends TestBase {
 
     @Test
     void ofertaDemasiadoCortaNoLlamaALaIa() throws Exception {
-        mvc.perform(post("/evaluaciones")
+        mvc.perform(post("/api/v1/evaluaciones")
                         .header(HttpHeaders.AUTHORIZATION, bearer(registrar()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo("Busco programador")))
@@ -144,7 +144,7 @@ class EvaluacionIntegrationTest extends TestBase {
         when(claude.llamarHerramienta(anyString(), anyString(), eq("registrar_evaluacion"), anyString(), anyMap()))
                 .thenReturn(json.readTree("{\"semaforo\": \"MORADO\"}"));
 
-        mvc.perform(post("/evaluaciones")
+        mvc.perform(post("/api/v1/evaluaciones")
                         .header(HttpHeaders.AUTHORIZATION, bearer(registrar()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo(OFERTA)))
@@ -156,7 +156,7 @@ class EvaluacionIntegrationTest extends TestBase {
         when(claude.llamarHerramienta(anyString(), anyString(), eq("registrar_evaluacion"), anyString(), anyMap()))
                 .thenThrow(new IaException("caída"));
 
-        mvc.perform(post("/evaluaciones")
+        mvc.perform(post("/api/v1/evaluaciones")
                         .header(HttpHeaders.AUTHORIZATION, bearer(registrar()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo(OFERTA)))
@@ -166,7 +166,7 @@ class EvaluacionIntegrationTest extends TestBase {
     @Test
     void lasEvaluacionesSonPrivadas() throws Exception {
         String ana = registrar();
-        var resultado = mvc.perform(post("/evaluaciones")
+        var resultado = mvc.perform(post("/api/v1/evaluaciones")
                         .header(HttpHeaders.AUTHORIZATION, bearer(ana))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo(OFERTA)))
@@ -174,7 +174,7 @@ class EvaluacionIntegrationTest extends TestBase {
                 .andReturn();
         long id = leer(resultado).get("id").asLong();
 
-        mvc.perform(get("/evaluaciones/{id}", id).header(HttpHeaders.AUTHORIZATION, bearer(registrar())))
+        mvc.perform(get("/api/v1/evaluaciones/{id}", id).header(HttpHeaders.AUTHORIZATION, bearer(registrar())))
                 .andExpect(status().isNotFound());
     }
 }

@@ -28,7 +28,7 @@ Para guardar las candidaturas del usuario, evaluar ofertas contra su perfil y ge
 
 ## cuánto tiempo se guardan
 
-Mientras la cuenta exista. Desde Perfil, "Borrar cuenta y datos" borra al momento la cuenta, el perfil, las candidaturas, las evaluaciones, los CV y el registro de usos de IA (`DELETE /cuenta`). No quedan copias en la base de datos.
+Mientras la cuenta exista. Desde Perfil, "Borrar cuenta y datos" borra al momento la cuenta, el perfil, las candidaturas, las evaluaciones, los CV y el registro de usos de IA (`DELETE /api/v1/cuenta`). No quedan copias en la base de datos.
 
 ## derechos
 

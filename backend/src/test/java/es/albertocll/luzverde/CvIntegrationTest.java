@@ -101,14 +101,14 @@ class CvIntegrationTest extends TestBase {
 
     private String usuarioConPerfil() throws Exception {
         String token = registrar();
-        mvc.perform(put("/perfil").header(HttpHeaders.AUTHORIZATION, bearer(token))
+        mvc.perform(put("/api/v1/perfil").header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .contentType(MediaType.APPLICATION_JSON).content(PERFIL))
                 .andExpect(status().isOk());
         return token;
     }
 
     private long generar(String token) throws Exception {
-        var resultado = mvc.perform(post("/cv")
+        var resultado = mvc.perform(post("/api/v1/cv")
                         .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(Map.of("ofertaTexto", EvaluacionIntegrationTest.OFERTA))))
@@ -126,7 +126,7 @@ class CvIntegrationTest extends TestBase {
         String token = usuarioConPerfil();
         long id = generar(token);
 
-        byte[] pdf = mvc.perform(get("/cv/{id}/pdf", id).header(HttpHeaders.AUTHORIZATION, bearer(token)))
+        byte[] pdf = mvc.perform(get("/api/v1/cv/{id}/pdf", id).header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE))
                 .andReturn().getResponse().getContentAsByteArray();
@@ -153,7 +153,7 @@ class CvIntegrationTest extends TestBase {
         String token = usuarioConPerfil();
         long id = generar(token);
 
-        byte[] docx = mvc.perform(get("/cv/{id}/docx", id).header(HttpHeaders.AUTHORIZATION, bearer(token)))
+        byte[] docx = mvc.perform(get("/api/v1/cv/{id}/docx", id).header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsByteArray();
 
@@ -179,16 +179,16 @@ class CvIntegrationTest extends TestBase {
         long id = generar(token);
 
         String otro = registrar();
-        mvc.perform(get("/cv/{id}/pdf", id).header(HttpHeaders.AUTHORIZATION, bearer(otro)))
+        mvc.perform(get("/api/v1/cv/{id}/pdf", id).header(HttpHeaders.AUTHORIZATION, bearer(otro)))
                 .andExpect(status().isNotFound());
-        mvc.perform(get("/cv/{id}", id).header(HttpHeaders.AUTHORIZATION, bearer(otro)))
+        mvc.perform(get("/api/v1/cv/{id}", id).header(HttpHeaders.AUTHORIZATION, bearer(otro)))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void sinPerfilTambienGeneraUnCvValido() throws Exception {
         String token = registrar();
-        var resultado = mvc.perform(post("/cv")
+        var resultado = mvc.perform(post("/api/v1/cv")
                         .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(Map.of("ofertaTexto", EvaluacionIntegrationTest.OFERTA))))
@@ -196,7 +196,7 @@ class CvIntegrationTest extends TestBase {
                 .andReturn();
         long id = leer(resultado).get("id").asLong();
 
-        byte[] pdf = mvc.perform(get("/cv/{id}/pdf", id).header(HttpHeaders.AUTHORIZATION, bearer(token)))
+        byte[] pdf = mvc.perform(get("/api/v1/cv/{id}/pdf", id).header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsByteArray();
         try (PDDocument documento = Loader.loadPDF(pdf)) {

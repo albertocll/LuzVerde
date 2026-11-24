@@ -35,7 +35,7 @@ describe('api', () => {
 
     expect(sesion).toEqual({ token: 'abc', usuarioId: 3, nombre: 'Ana' });
     const [url, opciones] = fetchSimulado.mock.calls[0];
-    expect(url).toBe('http://servidor.test/auth/login');
+    expect(url).toBe('http://servidor.test/api/v1/auth/login');
     expect(opciones.method).toBe('POST');
     expect(JSON.parse(opciones.body)).toEqual({ email: 'ana@ejemplo.com', password: 'secreta' });
     expect(opciones.headers.Authorization).toBeUndefined();
@@ -48,7 +48,7 @@ describe('api', () => {
     await api.candidaturas('ENVIADA');
 
     const [url, opciones] = fetchSimulado.mock.calls[0];
-    expect(url).toBe('http://servidor.test/candidaturas?estado=ENVIADA');
+    expect(url).toBe('http://servidor.test/api/v1/candidaturas?estado=ENVIADA');
     expect(opciones.headers.Authorization).toBe('Bearer mi-token');
   });
 
@@ -108,7 +108,7 @@ describe('api', () => {
     await expect(api.borrarCuenta()).resolves.toBeUndefined();
 
     const [url, opciones] = fetchSimulado.mock.calls[0];
-    expect(url).toBe('http://servidor.test/cuenta');
+    expect(url).toBe('http://servidor.test/api/v1/cuenta');
     expect(opciones.method).toBe('DELETE');
     expect(opciones.headers.Authorization).toBe('Bearer mi-token');
   });

@@ -28,7 +28,7 @@ class CandidaturaIntegrationTest extends TestBase {
     }
 
     private long crear(String token, String cuerpo) throws Exception {
-        var resultado = mvc.perform(post("/candidaturas")
+        var resultado = mvc.perform(post("/api/v1/candidaturas")
                         .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo))
@@ -42,23 +42,23 @@ class CandidaturaIntegrationTest extends TestBase {
         String token = registrar();
         long id = crear(token, candidatura("Acme", "PENDIENTE", "2026-11-20"));
 
-        mvc.perform(get("/candidaturas/{id}", id).header(HttpHeaders.AUTHORIZATION, bearer(token)))
+        mvc.perform(get("/api/v1/candidaturas/{id}", id).header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.empresa").value("Acme"))
                 .andExpect(jsonPath("$.estado").value("PENDIENTE"))
                 .andExpect(jsonPath("$.fecha").value("2026-11-20"));
 
-        mvc.perform(put("/candidaturas/{id}", id)
+        mvc.perform(put("/api/v1/candidaturas/{id}", id)
                         .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(candidatura("Acme", "ENTREVISTA", "2026-11-22")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.estado").value("ENTREVISTA"));
 
-        mvc.perform(delete("/candidaturas/{id}", id).header(HttpHeaders.AUTHORIZATION, bearer(token)))
+        mvc.perform(delete("/api/v1/candidaturas/{id}", id).header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isNoContent());
 
-        mvc.perform(get("/candidaturas/{id}", id).header(HttpHeaders.AUTHORIZATION, bearer(token)))
+        mvc.perform(get("/api/v1/candidaturas/{id}", id).header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isNotFound());
     }
 
@@ -69,17 +69,17 @@ class CandidaturaIntegrationTest extends TestBase {
         crear(token, candidatura("Dos", "ENVIADA", "2026-11-05"));
         crear(token, candidatura("Tres", "DESCARTADA", "2026-11-03"));
 
-        mvc.perform(get("/candidaturas").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+        mvc.perform(get("/api/v1/candidaturas").header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(3)))
                 .andExpect(jsonPath("$[0].empresa").value("Dos"));
 
-        mvc.perform(get("/candidaturas").param("estado", "ENVIADA")
+        mvc.perform(get("/api/v1/candidaturas").param("estado", "ENVIADA")
                         .header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
 
-        mvc.perform(get("/candidaturas").param("estado", "NO_EXISTE")
+        mvc.perform(get("/api/v1/candidaturas").param("estado", "NO_EXISTE")
                         .header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isBadRequest());
     }
@@ -90,23 +90,23 @@ class CandidaturaIntegrationTest extends TestBase {
         String luis = registrar();
         long idDeAna = crear(ana, candidatura("Privada", "ENVIADA", "2026-11-10"));
 
-        mvc.perform(get("/candidaturas").header(HttpHeaders.AUTHORIZATION, bearer(luis)))
+        mvc.perform(get("/api/v1/candidaturas").header(HttpHeaders.AUTHORIZATION, bearer(luis)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
 
-        mvc.perform(get("/candidaturas/{id}", idDeAna).header(HttpHeaders.AUTHORIZATION, bearer(luis)))
+        mvc.perform(get("/api/v1/candidaturas/{id}", idDeAna).header(HttpHeaders.AUTHORIZATION, bearer(luis)))
                 .andExpect(status().isNotFound());
 
-        mvc.perform(put("/candidaturas/{id}", idDeAna)
+        mvc.perform(put("/api/v1/candidaturas/{id}", idDeAna)
                         .header(HttpHeaders.AUTHORIZATION, bearer(luis))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(candidatura("Hackeada", "DESCARTADA", "2026-11-10")))
                 .andExpect(status().isNotFound());
 
-        mvc.perform(delete("/candidaturas/{id}", idDeAna).header(HttpHeaders.AUTHORIZATION, bearer(luis)))
+        mvc.perform(delete("/api/v1/candidaturas/{id}", idDeAna).header(HttpHeaders.AUTHORIZATION, bearer(luis)))
                 .andExpect(status().isNotFound());
 
-        mvc.perform(get("/candidaturas/{id}", idDeAna).header(HttpHeaders.AUTHORIZATION, bearer(ana)))
+        mvc.perform(get("/api/v1/candidaturas/{id}", idDeAna).header(HttpHeaders.AUTHORIZATION, bearer(ana)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.empresa").value("Privada"));
     }
@@ -114,7 +114,7 @@ class CandidaturaIntegrationTest extends TestBase {
     @Test
     void validaCamposObligatorios() throws Exception {
         String token = registrar();
-        mvc.perform(post("/candidaturas")
+        mvc.perform(post("/api/v1/candidaturas")
                         .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""

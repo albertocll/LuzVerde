@@ -31,7 +31,7 @@ class SeguridadTest extends TestBase {
                 .encodeToString("{\"sub\":\"1\",\"email\":\"otro@ejemplo.com\"}".getBytes());
         String manipulado = partes[0] + "." + cuerpoFalso + "." + partes[2];
 
-        mvc.perform(get("/perfil").header(HttpHeaders.AUTHORIZATION, bearer(manipulado)))
+        mvc.perform(get("/api/v1/perfil").header(HttpHeaders.AUTHORIZATION, bearer(manipulado)))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -40,21 +40,21 @@ class SeguridadTest extends TestBase {
         String cabecera = Base64.getUrlEncoder().withoutPadding().encodeToString("{\"alg\":\"none\"}".getBytes());
         String cuerpo = Base64.getUrlEncoder().withoutPadding().encodeToString("{\"sub\":\"1\"}".getBytes());
 
-        mvc.perform(get("/perfil").header(HttpHeaders.AUTHORIZATION, bearer(cabecera + "." + cuerpo + ".")))
+        mvc.perform(get("/api/v1/perfil").header(HttpHeaders.AUTHORIZATION, bearer(cabecera + "." + cuerpo + ".")))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void fuerzaBrutaContraUnaCuentaSeBloquea() throws Exception {
         String email = emailUnico();
-        mvc.perform(post("/auth/registro").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"email": "%s", "password": "contrasena-buena", "nombre": "Víctima"}
                                 """.formatted(email)))
                 .andExpect(status().isCreated());
 
         for (int i = 0; i < 5; i++) {
-            mvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON)
+            mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
                             .content("""
                                     {"email": "%s", "password": "intento-%d"}
                                     """.formatted(email, i)))
@@ -62,7 +62,7 @@ class SeguridadTest extends TestBase {
         }
 
         // Aunque ahora acierte, sigue bloqueado durante la ventana.
-        mvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"email": "%s", "password": "contrasena-buena"}
                                 """.formatted(email)))
@@ -71,7 +71,7 @@ class SeguridadTest extends TestBase {
 
     @Test
     void lasRespuestasNoExponenLaContrasenaNiSuHash() throws Exception {
-        mvc.perform(post("/auth/registro").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"email": "%s", "password": "contrasena-segura", "nombre": "Ana"}
                                 """.formatted(emailUnico())))
@@ -87,7 +87,7 @@ class SeguridadTest extends TestBase {
         String ana = registrar();
         String luis = registrar();
 
-        mvc.perform(post("/candidaturas")
+        mvc.perform(post("/api/v1/candidaturas")
                         .header(HttpHeaders.AUTHORIZATION, bearer(luis))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -97,9 +97,9 @@ class SeguridadTest extends TestBase {
                 .andExpect(status().isCreated());
 
         // Ana no ve la candidatura aunque Luis haya intentado asignarla a otro usuario.
-        mvc.perform(get("/candidaturas").header(HttpHeaders.AUTHORIZATION, bearer(ana)))
+        mvc.perform(get("/api/v1/candidaturas").header(HttpHeaders.AUTHORIZATION, bearer(ana)))
                 .andExpect(jsonPath("$", hasSize(0)));
-        mvc.perform(get("/candidaturas").header(HttpHeaders.AUTHORIZATION, bearer(luis)))
+        mvc.perform(get("/api/v1/candidaturas").header(HttpHeaders.AUTHORIZATION, bearer(luis)))
                 .andExpect(jsonPath("$", hasSize(1)));
     }
 
@@ -107,12 +107,12 @@ class SeguridadTest extends TestBase {
     void entradasMaliciosasNoRompenNadaNiFiltranTrazas() throws Exception {
         String token = registrar();
 
-        mvc.perform(get("/candidaturas").param("estado", "ENVIADA' OR '1'='1")
+        mvc.perform(get("/api/v1/candidaturas").param("estado", "ENVIADA' OR '1'='1")
                         .header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(not(containsString("Exception"))));
 
-        mvc.perform(post("/candidaturas")
+        mvc.perform(post("/api/v1/candidaturas")
                         .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{esto no es json"))
@@ -121,7 +121,7 @@ class SeguridadTest extends TestBase {
                 .andExpect(content().string(not(containsString("at es.albertocll"))));
 
         // El texto se guarda tal cual: sin inyección SQL ni ejecución.
-        mvc.perform(post("/candidaturas")
+        mvc.perform(post("/api/v1/candidaturas")
                         .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -131,14 +131,14 @@ class SeguridadTest extends TestBase {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.empresa").value("Robert'); DROP TABLE candidaturas;--"));
 
-        mvc.perform(get("/candidaturas").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+        mvc.perform(get("/api/v1/candidaturas").header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)));
     }
 
     @Test
     void cabecerasDeSeguridad() throws Exception {
-        mvc.perform(get("/candidaturas").header(HttpHeaders.AUTHORIZATION, bearer(registrar())))
+        mvc.perform(get("/api/v1/candidaturas").header(HttpHeaders.AUTHORIZATION, bearer(registrar())))
                 .andExpect(status().isOk())
                 .andExpect(header().string("X-Content-Type-Options", "nosniff"))
                 .andExpect(header().string("X-Frame-Options", "DENY"))

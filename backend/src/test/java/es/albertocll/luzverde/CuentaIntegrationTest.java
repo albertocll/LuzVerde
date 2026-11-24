@@ -38,7 +38,7 @@ class CuentaIntegrationTest extends TestBase {
     @Test
     void borrarLaCuentaBorraTodosSusDatos() throws Exception {
         String email = emailUnico();
-        var registro = mvc.perform(post("/auth/registro")
+        var registro = mvc.perform(post("/api/v1/auth/registro")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"email": "%s", "password": "contrasena-segura", "nombre": "Prueba"}
@@ -49,7 +49,7 @@ class CuentaIntegrationTest extends TestBase {
         long id = leer(registro).get("usuarioId").asLong();
         String otroToken = registrar();
 
-        mvc.perform(put("/perfil")
+        mvc.perform(put("/api/v1/perfil")
                         .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -58,7 +58,7 @@ class CuentaIntegrationTest extends TestBase {
                                 """))
                 .andExpect(status().isOk());
         for (String t : new String[]{token, otroToken}) {
-            mvc.perform(post("/candidaturas")
+            mvc.perform(post("/api/v1/candidaturas")
                             .header(HttpHeaders.AUTHORIZATION, bearer(t))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
@@ -77,7 +77,7 @@ class CuentaIntegrationTest extends TestBase {
         cvs.save(cv);
         usosIa.save(new UsoIa(id, "EVALUACION"));
 
-        mvc.perform(delete("/cuenta").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+        mvc.perform(delete("/api/v1/cuenta").header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isNoContent());
 
         assertThat(usuarios.existsById(id)).isFalse();
@@ -88,14 +88,14 @@ class CuentaIntegrationTest extends TestBase {
         assertThat(usosIa.countByUsuarioIdAndCreadoEnGreaterThanEqual(id, Instant.EPOCH)).isZero();
 
         // El otro usuario conserva sus datos.
-        mvc.perform(get("/candidaturas").header(HttpHeaders.AUTHORIZATION, bearer(otroToken)))
+        mvc.perform(get("/api/v1/candidaturas").header(HttpHeaders.AUTHORIZATION, bearer(otroToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
 
         // El token de la cuenta borrada ya no sirve y el correo no puede entrar.
-        mvc.perform(get("/perfil").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+        mvc.perform(get("/api/v1/perfil").header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isUnauthorized());
-        mvc.perform(post("/auth/login")
+        mvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"email": "%s", "password": "contrasena-segura"}
@@ -105,6 +105,6 @@ class CuentaIntegrationTest extends TestBase {
 
     @Test
     void sinTokenNoSePuedeBorrar() throws Exception {
-        mvc.perform(delete("/cuenta")).andExpect(status().isUnauthorized());
+        mvc.perform(delete("/api/v1/cuenta")).andExpect(status().isUnauthorized());
     }
 }

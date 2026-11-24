@@ -63,7 +63,7 @@ sequenceDiagram
     participant API
     participant BD as PostgreSQL
     participant Claude
-    App->>API: POST /evaluaciones (texto de la oferta)
+    App->>API: POST /api/v1/evaluaciones (texto de la oferta)
     API->>BD: ¿usos de IA hoy < 10?
     BD-->>API: sí, se apunta el uso
     API->>Claude: perfil + oferta, herramienta registrar_evaluacion forzada
