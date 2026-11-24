@@ -39,7 +39,7 @@ public class AuthService {
     public TokenResponse registrar(RegistroRequest peticion) {
         String email = normalizar(peticion.email());
         if (usuarios.existsByEmailIgnoreCase(email)) {
-            throw new ConflictoException("Ya existe una cuenta con ese email");
+            throw new ConflictoException("EMAIL_TAKEN", "Ya existe una cuenta con ese email");
         }
         Usuario usuario = usuarios.save(new Usuario(
                 email,
