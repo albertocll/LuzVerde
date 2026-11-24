@@ -22,3 +22,6 @@ Thumbs.db
 # React Native / Expo (fase 4)
 mobile/node_modules/
 mobile/.expo/
+mobile/dist/
+mobile/dist-demo/
+mobile/coverage/

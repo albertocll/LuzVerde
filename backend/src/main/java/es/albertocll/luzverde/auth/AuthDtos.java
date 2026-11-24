@@ -26,9 +26,11 @@ public final class AuthDtos {
 
     public record LoginRequest(
             @NotBlank(message = "El email es obligatorio")
+            @Size(max = 254)
             String email,
 
             @NotBlank(message = "La contraseña es obligatoria")
+            @Size(max = 72)
             String password) {
     }
 

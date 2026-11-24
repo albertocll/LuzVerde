@@ -1,0 +1,155 @@
+import { File, Paths } from 'expo-file-system';
+import { cargarUrlServidor } from './config';
+import type {
+  Candidatura,
+  CandidaturaDatos,
+  Cv,
+  EstadoCandidatura,
+  Evaluacion,
+  EvaluacionResumen,
+  Perfil,
+  Sesion,
+} from './tipos';
+
+export class ErrorApi extends Error {
+  constructor(
+    message: string,
+    readonly estado: number,
+    readonly campos: Record<string, string> = {},
+  ) {
+    super(message);
+  }
+}
+
+let token: string | null = null;
+let alCaducarSesion: (() => void) | null = null;
+
+export function fijarToken(nuevo: string | null) {
+  token = nuevo;
+}
+
+export function alExpirarSesion(callback: () => void) {
+  alCaducarSesion = callback;
+}
+
+const MENSAJES: Record<number, string> = {
+  401: 'Tu sesión ha caducado. Vuelve a entrar.',
+  404: 'No se ha encontrado.',
+  429: 'Has llegado al límite de usos de IA por hoy.',
+  502: 'El servicio de IA ha fallado. Prueba otra vez en un rato.',
+  503: 'El servidor no tiene la IA configurada todavía.',
+};
+
+async function peticion<T>(ruta: string, opciones: RequestInit = {}): Promise<T> {
+  const base = await cargarUrlServidor();
+  let respuesta: Response;
+  try {
+    respuesta = await fetch(`${base}${ruta}`, {
+      ...opciones,
+      headers: {
+        Accept: 'application/json',
+        ...(opciones.body ? { 'Content-Type': 'application/json' } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...opciones.headers,
+      },
+    });
+  } catch {
+    throw new ErrorApi(`No se puede conectar con el servidor (${base}). Revisa la URL en Perfil.`, 0);
+  }
+
+  if (respuesta.status === 204) {
+    return undefined as T;
+  }
+
+  const cuerpo = await respuesta.text();
+  const datos = cuerpo ? safeJson(cuerpo) : null;
+
+  if (!respuesta.ok) {
+    if (respuesta.status === 401 && token && !ruta.startsWith('/auth/')) {
+      alCaducarSesion?.();
+    }
+    const detalle = typeof datos?.detail === 'string' ? datos.detail : null;
+    throw new ErrorApi(
+      detalle ?? MENSAJES[respuesta.status] ?? `Error ${respuesta.status}`,
+      respuesta.status,
+      datos?.campos ?? {},
+    );
+  }
+  return datos as T;
+}
+
+function safeJson(texto: string): any {
+  try {
+    return JSON.parse(texto);
+  } catch {
+    return null;
+  }
+}
+
+const json = (cuerpo: unknown) => JSON.stringify(cuerpo);
+
+interface RespuestaToken {
+  token: string;
+  usuarioId: number;
+  nombre: string;
+}
+
+const apiServidor = {
+  async login(email: string, password: string): Promise<Sesion> {
+    const r = await peticion<RespuestaToken>('/auth/login', { method: 'POST', body: json({ email, password }) });
+    return { token: r.token, usuarioId: r.usuarioId, nombre: r.nombre };
+  },
+  async registro(nombre: string, email: string, password: string): Promise<Sesion> {
+    const r = await peticion<RespuestaToken>('/auth/registro', {
+      method: 'POST',
+      body: json({ nombre, email, password }),
+    });
+    return { token: r.token, usuarioId: r.usuarioId, nombre: r.nombre };
+  },
+
+  candidaturas: (estado?: EstadoCandidatura) =>
+    peticion<Candidatura[]>(`/candidaturas${estado ? `?estado=${estado}` : ''}`),
+  candidatura: (id: number) => peticion<Candidatura>(`/candidaturas/${id}`),
+  crearCandidatura: (datos: CandidaturaDatos) =>
+    peticion<Candidatura>('/candidaturas', { method: 'POST', body: json(datos) }),
+  actualizarCandidatura: (id: number, datos: CandidaturaDatos) =>
+    peticion<Candidatura>(`/candidaturas/${id}`, { method: 'PUT', body: json(datos) }),
+  borrarCandidatura: (id: number) => peticion<void>(`/candidaturas/${id}`, { method: 'DELETE' }),
+
+  perfil: () => peticion<Perfil>('/perfil'),
+  guardarPerfil: (perfil: Perfil) => peticion<Perfil>('/perfil', { method: 'PUT', body: json(perfil) }),
+
+  evaluar: (ofertaTexto: string) =>
+    peticion<Evaluacion>('/evaluaciones', { method: 'POST', body: json({ ofertaTexto }) }),
+  evaluaciones: () => peticion<EvaluacionResumen[]>('/evaluaciones'),
+  evaluacion: (id: number) => peticion<Evaluacion>(`/evaluaciones/${id}`),
+
+  generarCv: (ofertaTexto: string) => peticion<Cv>('/cv', { method: 'POST', body: json({ ofertaTexto }) }),
+  cvs: () => peticion<Cv[]>('/cv'),
+
+  /** Descarga el PDF o el DOCX a la caché del móvil y devuelve su URI local. */
+  async descargarCv(cv: Cv, formato: 'pdf' | 'docx'): Promise<string> {
+    const base = await cargarUrlServidor();
+    const ruta = formato === 'pdf' ? cv.urlPdf : cv.urlDocx;
+    const nombre = `CV-${(cv.empresa ?? 'oferta').replace(/[^\p{L}\p{N}]+/gu, '-')}-${cv.id}.${formato}`;
+    const destino = new File(Paths.cache, nombre);
+    if (destino.exists) {
+      destino.delete();
+    }
+    const tarea = File.createDownloadTask(`${base}${ruta}`, destino, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    const archivo = await tarea.downloadAsync();
+    if (!archivo) {
+      throw new ErrorApi('La descarga no se ha completado.', 0);
+    }
+    return archivo.uri;
+  },
+};
+
+/**
+ * Con EXPO_PUBLIC_DEMO=1 (solo en npm run web:demo) la app usa datos falsos en memoria.
+ * Babel sustituye la variable al construir y Metro elimina el require en la build normal.
+ */
+export const api: typeof apiServidor =
+  process.env.EXPO_PUBLIC_DEMO === '1' ? require('./demo/apiDemo').apiDemo : apiServidor;

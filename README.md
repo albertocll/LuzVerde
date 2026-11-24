@@ -1,60 +1,239 @@
-# Luz Verde
+# 🚦 Luz Verde
 
-Asesor de empleo para Android. Guarda tus candidaturas, tu perfil profesional y, en próximas fases, evalúa ofertas y genera CV adaptados a cada una.
+> **Asesor de empleo con IA para Android.** Guarda tus candidaturas, pega una oferta y te dice con un semáforo si encaja contigo, y genera un CV para ATS adaptado a esa oferta sin inventar nada.
 
-Proyecto de portfolio de Alberto (github.com/albertocll).
+[![CI](https://github.com/albertocll/luz-verde/actions/workflows/ci.yml/badge.svg)](https://github.com/albertocll/luz-verde/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/albertocll/luz-verde/actions/workflows/codeql.yml/badge.svg)](https://github.com/albertocll/luz-verde/actions/workflows/codeql.yml)
+[![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Expo](https://img.shields.io/badge/Expo-SDK_58-000020?logo=expo&logoColor=white)](https://expo.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Claude API](https://img.shields.io/badge/Claude_API-Haiku-D97757?logo=anthropic&logoColor=white)](https://docs.anthropic.com/)
 
-## stack
+![Luz Verde: candidaturas, evaluación de una oferta y CV adaptado](docs/img/mockup.png)
 
-- Backend: Java 21, Spring Boot 3.5, Spring Data JPA, Spring Security con JWT, PostgreSQL.
-- Documentación de la API: OpenAPI con Swagger UI (springdoc).
-- Tests: JUnit 5 y MockMvc sobre H2 en memoria.
-- App móvil (fase 4): React Native con Expo y TypeScript.
+---
 
-## estructura
+## 📖 Sobre el proyecto
+
+**Luz Verde** nace de un problema concreto: cuando buscas trabajo acabas con decenas de ofertas, no sabes cuáles merecen la pena y adaptas el CV a mano para cada una. La app lo junta todo en un sitio.
+
+- Pegas el texto de una oferta y la IA lo compara con tu perfil: **verde** si encaja, **amarillo** si encaja a medias, **rojo** si no. Te dice qué tienes a favor, qué te falta, qué banderas rojas ve y qué harías tú en su lugar.
+- Con un toque genera un **CV en PDF y Word pensado para los filtros ATS** y una carta de presentación de 150 palabras como máximo.
+- La regla dura es que **el CV no inventa nada**. Si la oferta pide algo que no está en tu perfil, no aparece en el CV y te lo dice como hueco.
+
+Proyecto de portfolio de Alberto ([github.com/albertocll](https://github.com/albertocll)). Backend propio en Spring Boot con PostgreSQL y app en React Native con Expo.
+
+---
+
+## 📱 Pantallas
+
+| Candidaturas | Evaluar oferta | Resultado | CV adaptado | Perfil |
+|:---:|:---:|:---:|:---:|:---:|
+| ![Candidaturas](docs/img/candidaturas.png) | ![Evaluar](docs/img/evaluar.png) | ![Evaluación verde](docs/img/evaluacion.png) | ![CV](docs/img/cv.png) | ![Perfil](docs/img/perfil.png) |
+
+Las capturas salen del **modo demo**, con datos inventados. Para verlo en tu navegador sin backend:
+
+```bash
+cd mobile
+npm install
+npm run web:demo
+```
+
+Entra con cualquier email y contraseña. El modo demo no entra en la build de producción: solo se activa con `EXPO_PUBLIC_DEMO=1` y Metro elimina ese código de la build normal.
+
+---
+
+## ✨ Características
+
+- 📋 **Candidaturas** con cinco estados (pendiente, enviada, esperando respuesta, entrevista, descartada), filtros y resumen de un vistazo
+- 🚦 **Evaluador de ofertas con IA**: semáforo, pros, huecos, banderas rojas y acción recomendada
+- 📄 **CV para ATS** en PDF (texto seleccionable) y DOCX, una columna, sin tablas ni gráficos
+- ✉️ **Carta de presentación** de 150 palabras como máximo, lista para compartir
+- 🛡️ **GuardianVeracidad**: comprueba en el servidor que el CV y la carta no mencionan nada que no esté en tu perfil
+- 👤 **Perfil profesional** con stack por niveles, experiencia, proyectos, formación, idiomas, salario mínimo y modalidad
+- 📊 **Barra de progreso del perfil** que te dice qué rellenar para que la IA tenga lo que necesita
+- 🔐 **Autenticación JWT**, token en el almacén seguro de Android y límite de intentos de login
+- 💸 **Gasto de IA controlado**: 10 usos por usuario y día y tope de tokens por llamada
+- ♿ **Accesible**: roles, estados y etiquetas en botones, chips, campos y semáforo
+
+---
+
+## 🛠 Stack tecnológico
+
+### Backend
+- **Lenguaje:** Java 21
+- **Framework:** Spring Boot 3.5 (Web, Data JPA, Security, Validation, Actuator)
+- **Base de datos:** PostgreSQL 17
+- **Autenticación:** JWT (jjwt) con BCrypt
+- **IA:** API de Claude (`claude-haiku-5-5`) con salida forzada por herramienta y esquema JSON fijo
+- **Documentos:** OpenPDF para el PDF y Apache POI para el DOCX
+- **Documentación de la API:** OpenAPI con Swagger UI (springdoc)
+- **Tests:** JUnit 5, MockMvc y H2 en memoria, cobertura con JaCoCo
+
+### App móvil
+- **Framework:** React Native 0.88 con Expo SDK 58
+- **Navegación:** Expo Router (pestañas y pilas)
+- **Lenguaje:** TypeScript 6
+- **Almacenamiento seguro:** `expo-secure-store` (Keystore de Android)
+- **Web:** `react-native-web` para la vista previa y el modo demo
+- **Tests:** Jest y Testing Library
+
+### Calidad y seguridad
+- **CI:** GitHub Actions en cada push (tests del backend con cobertura mínima del 70 %, typecheck y tests de la app)
+- **Análisis:** CodeQL con consultas `security-extended`
+- **Secretos:** gitleaks en cada push
+- **Dependencias:** Dependabot semanal
+
+---
+
+## 🏗 Arquitectura
+
+```mermaid
+flowchart LR
+    App["📱 App Expo<br/>React Native + TypeScript"] -- "REST + JWT" --> API["☕ API Spring Boot"]
+    API --> DB[("🐘 PostgreSQL")]
+    API -- "Evaluar oferta / generar CV" --> Claude["🤖 API de Claude"]
+    API --> Guardian["🛡️ GuardianVeracidad"]
+    Guardian --> Docs["📄 PDF y DOCX"]
+```
+
+La clave de la API de Claude vive solo en el servidor. La app nunca la ve. Más detalle en [arquitectura](docs/arquitectura.md).
+
+---
+
+## 📁 Estructura del repositorio
 
 ```
 luz-verde/
-├── backend/            API REST en Spring Boot
-├── mobile/             App React Native (pendiente)
-├── docker-compose.yml  PostgreSQL y backend para desarrollo local
-└── .env.example        Variables de entorno de ejemplo
+├── backend/                 API REST en Spring Boot
+│   └── src/main/java/es/albertocll/luzverde/
+│       ├── auth/            Registro, login y límite de intentos
+│       ├── candidatura/     CRUD de candidaturas
+│       ├── perfil/          Perfil profesional
+│       ├── evaluacion/      Evaluador de ofertas
+│       ├── cv/              Generador de CV, GuardianVeracidad y renderizadores
+│       ├── ia/              Cliente de Claude y límite de usos
+│       ├── seguridad/       JWT
+│       └── error/           Manejador de errores
+├── mobile/                  App React Native (Expo)
+│   ├── src/app/             Pantallas (Expo Router)
+│   ├── src/componentes/     Semáforo, avisos y componentes de interfaz
+│   └── src/demo/            API falsa del modo demo (solo web:demo)
+├── docs/                    Arquitectura, decisiones, seguridad, interfaz y privacidad
+├── .github/                 CI, CodeQL, Dependabot y plantillas
+├── docker-compose.yml       PostgreSQL y backend para desarrollo local
+└── .env.example             Variables de entorno de ejemplo
 ```
 
-## arrancar en local
+---
 
-Necesitas Docker y, si vas a ejecutar el backend fuera de Docker, Java 21 y Maven.
+## ⚙ Puesta en marcha
 
-1. Copia `.env.example` como `.env` y rellena `DB_PASSWORD` y `JWT_SECRET`. Para la clave JWT vale `openssl rand -base64 48`.
-2. Levanta todo con Docker:
+### Requisitos
+- Docker
+- Node.js 22 para la app
+- Java 21 y Maven solo si vas a ejecutar el backend fuera de Docker
+- Android Studio con un emulador para probar la app en Android
 
+### Backend
+
+1. Clona el repositorio:
+   ```bash
+   git clone https://github.com/albertocll/luz-verde.git
+   cd luz-verde
    ```
+
+2. Copia `.env.example` como `.env` y rellena `DB_PASSWORD` y `JWT_SECRET`. Para la clave JWT vale `openssl rand -base64 48`. Si quieres usar la IA, añade `ANTHROPIC_API_KEY`.
+
+3. Levanta la base de datos y el backend:
+   ```bash
    docker compose up --build
    ```
 
-   O solo la base de datos, y el backend desde el IDE o la terminal:
-
-   ```
+   O solo la base de datos, y el backend desde el IDE:
+   ```bash
    docker compose up db
    cd backend
    mvn spring-boot:run
    ```
 
-   En este segundo caso el backend necesita las variables `DB_PASSWORD` y `JWT_SECRET` en el entorno (en IntelliJ, en la configuración de ejecución).
-3. La API queda en `http://localhost:8080` y la documentación en `http://localhost:8080/swagger-ui.html`.
+   En este segundo caso el backend necesita `DB_PASSWORD` y `JWT_SECRET` en el entorno.
 
-## tests
+4. La API queda en `http://localhost:8080` y la documentación en `http://localhost:8080/swagger-ui.html`.
 
-```
+Sin `ANTHROPIC_API_KEY` todo funciona salvo el evaluador y el CV, que responden 503.
+
+### App en el emulador de Android
+
+1. Con el backend arrancado, abre un emulador desde el Device Manager de Android Studio.
+2. En otra terminal:
+   ```bash
+   cd mobile
+   npm install
+   npx expo start --android
+   ```
+
+En el emulador, `http://10.0.2.2:8080` apunta al backend de tu ordenador. La URL se cambia desde la app (Perfil o el desplegable Servidor del login) o con `EXPO_PUBLIC_API_URL`.
+
+### Scripts de la app
+
+| Script | Qué hace |
+|---|---|
+| `npm run android` | Arranca Expo y abre la app en Android |
+| `npm run web` | Arranca la app en el navegador contra el backend |
+| `npm run web:demo` | Arranca la app en el navegador con datos inventados |
+| `npm run export:demo` | Genera la web del modo demo en `dist-demo/` |
+| `npm run typecheck` | Comprueba los tipos |
+| `npm test` | Ejecuta los tests |
+
+---
+
+## 🧪 Tests
+
+```bash
 cd backend
-mvn test
+mvn verify          # tests, y cobertura mínima del 70 % con JaCoCo
+
+cd ../mobile
+npm run typecheck
+npm test
 ```
 
-Los tests usan H2 en memoria, así que no necesitan Docker ni PostgreSQL.
+Los tests del backend usan H2 en memoria y simulan la API de Claude: no necesitan Docker, PostgreSQL ni créditos. El informe de cobertura queda en `backend/target/site/jacoco/index.html`.
 
-## api
+---
 
-Todas las rutas salvo `/auth/**` y Swagger piden la cabecera `Authorization: Bearer <token>`.
+## 🚦 Evaluador de ofertas
+
+`POST /evaluaciones` recibe el texto de una oferta, lo compara con tu perfil usando la API de Claude y devuelve un semáforo (`VERDE`, `AMARILLO` o `ROJO`) con pros, huecos, banderas rojas y la acción recomendada.
+
+- El modelo responde llamando a una herramienta con un esquema JSON fijo. La salida siempre tiene la misma forma.
+- El texto de la oferta va entre etiquetas y el prompt dice que es un dato, no instrucciones.
+- Límite de 10 usos de IA por usuario y día (hora de Madrid) y tope de tokens por llamada.
+- Modelo por defecto `claude-haiku-5-5`. Se cambia con `ANTHROPIC_MODELO`.
+
+---
+
+## 📄 Generador de CV
+
+`POST /cv` genera un CV adaptado a la oferta en PDF y DOCX, más una carta de presentación.
+
+Formato pensado para ATS: una sola columna, sin tablas, imágenes, iconos ni barras de nivel, Helvetica en el PDF y Arial en el DOCX, apartados con nombres normales (Perfil, Tecnologías, Experiencia, Proyectos, Formación, Idiomas) y fechas en formato `MM/AAAA`.
+
+Cómo se asegura que no inventa nada, sin fiarse solo del modelo:
+
+- Puestos, empresas, fechas, títulos y centros salen siempre del perfil. El modelo solo elige el orden y reformula las viñetas.
+- Las tecnologías del CV son las del perfil con nivel sólido o medio. Si el modelo propone otra, se descarta.
+- Cualquier frase que nombre una tecnología que pide la oferta y que no tienes se elimina del CV y de la carta, y esa tecnología pasa a la lista de huecos.
+- Las experiencias y proyectos que el modelo no use se añaden igualmente con tu texto.
+
+---
+
+## 🔌 API
+
+Todas las rutas salvo `/auth/**`, Swagger y `/actuator/health` piden la cabecera `Authorization: Bearer <token>`. Cada usuario solo ve sus datos: lo ajeno responde 404, igual que si no existiera.
 
 | Método | Ruta | Qué hace |
 |---|---|---|
@@ -75,39 +254,20 @@ Todas las rutas salvo `/auth/**` y Swagger piden la cabecera `Authorization: Bea
 | GET | `/cv/{id}/docx` | Descarga el CV en Word |
 | PUT | `/perfil` | Crea o sustituye tu perfil |
 
-Estados de una candidatura: `PENDIENTE`, `ENVIADA`, `ESPERANDO_RESPUESTA`, `ENTREVISTA`, `DESCARTADA`.
+---
 
-El perfil guarda el titular del CV, el teléfono, LinkedIn y GitHub, el stack con su nivel (`SOLIDO`, `MEDIO`, `SIN_TOCAR`), el salario mínimo en euros brutos al año, la modalidad (`PRESENCIAL`, `HIBRIDO`, `REMOTO`), la ubicación, la experiencia, la formación, los proyectos y los idiomas. Las fechas de experiencia y formación van en formato `AAAA-MM`.
+## 🔐 Seguridad
 
-## evaluador de ofertas
+- Contraseñas con BCrypt y tokens JWT firmados con HS256. Se rechazan tokens manipulados y `alg: none`.
+- Login bloqueado 15 minutos tras 5 fallos con el mismo email o 20 desde la misma IP.
+- Errores sin trazas ni mensajes internos, cabeceras de seguridad y Actuator limitado a `health`.
+- Ningún secreto en el repositorio: todo va por variables de entorno, y gitleaks lo comprueba en cada push.
 
-`POST /evaluaciones` recibe el texto de una oferta, lo compara con tu perfil usando la API de Claude y devuelve un semáforo (`VERDE`, `AMARILLO` o `ROJO`) con pros, huecos, banderas rojas y la acción recomendada.
+Cada riesgo, su medida y el test que lo cubre están en [seguridad](docs/seguridad.md). Para informar de un fallo, mira [SECURITY.md](SECURITY.md).
 
-- La clave de la API vive solo en la variable de entorno `ANTHROPIC_API_KEY` del servidor. La app nunca la ve.
-- Sin clave, el resto de la API funciona y el evaluador responde 503.
-- Límite de 10 usos de IA por usuario y día (hora de Madrid) y tope de tokens por llamada.
-- Modelo por defecto: `claude-haiku-5-5`, el más pequeño de la familia actual. Se cambia con `ANTHROPIC_MODELO`.
-- El modelo responde llamando a una herramienta con un esquema JSON fijo, así la salida siempre tiene la misma forma.
-- Los tests simulan la API y no gastan créditos.
+---
 
-## generador de cv
-
-`POST /cv` recibe el texto de una oferta y genera un CV adaptado en PDF (texto seleccionable) y en DOCX, más una carta de presentación de 150 palabras como máximo.
-
-Formato pensado para ATS: una sola columna, sin tablas, imágenes, iconos ni barras de nivel, Helvetica en el PDF (métricas de Arial) y Arial en el DOCX, apartados con nombres normales (Perfil, Tecnologías, Experiencia, Proyectos, Formación, Idiomas) y fechas en formato `MM/AAAA`.
-
-La regla dura es que el CV no inventa nada, y no depende solo del modelo:
-
-- Puestos, empresas, fechas, títulos y centros salen siempre del perfil. El modelo solo elige el orden y reformula las viñetas.
-- Las tecnologías del CV son las del perfil con nivel sólido o medio. Si el modelo propone otra, se descarta.
-- Cualquier frase que nombre una tecnología que pide la oferta y el usuario no tiene se elimina del CV y de la carta, y esa tecnología pasa a la lista de huecos de la respuesta.
-- Las experiencias y proyectos que el modelo no use se añaden igualmente con el texto del usuario.
-
-Los PDF se generan con OpenPDF (LGPL/MPL) y los DOCX con Apache POI (Apache 2.0). Comparte el límite diario de usos de IA con el evaluador.
-
-Cada usuario solo ve y modifica sus datos. Si pides una candidatura de otro usuario, la API responde 404, igual que si no existiera.
-
-## variables de entorno
+## 🔧 Variables de entorno
 
 | Variable | Obligatoria | Uso |
 |---|---|---|
@@ -117,18 +277,41 @@ Cada usuario solo ve y modifica sus datos. Si pides una candidatura de otro usua
 | `JWT_SECRET` | Sí | Clave en Base64 de al menos 32 bytes para firmar los tokens |
 | `JWT_EXPIRACION_MINUTOS` | No | Duración del token. Por defecto 1440 (un día) |
 | `PORT` | No | Puerto HTTP. Por defecto 8080 |
+| `FORWARD_HEADERS_STRATEGY` | No | `native` detrás del proxy de Railway. Por defecto `none` |
 | `ANTHROPIC_API_KEY` | Para usar la IA | Clave de la API de Claude |
 | `ANTHROPIC_MODELO` | No | Modelo. Por defecto `claude-haiku-5-5` |
 | `ANTHROPIC_MAX_TOKENS` | No | Tope de tokens de salida por llamada. Por defecto 2048 |
 | `LIMITE_IA_DIARIO` | No | Usos de IA por usuario y día. Por defecto 10 |
 
-Ningún secreto vive en el repositorio.
+---
 
-## fases
+## 🗺 Hoja de ruta
 
-- [x] Fase 1. Backend base: registro y login, candidaturas, perfil, tests y Swagger.
-- [x] Fase 2. Evaluador de ofertas con la API de Claude.
-- [x] Fase 3. Generador de CV compatible con ATS.
-- [ ] Fase 4. App React Native.
-- [ ] Fase 5. Despliegue en Railway.
-- [ ] Fase 6. Publicación en Google Play.
+- [x] **Fase 1.** Backend base: registro y login, candidaturas, perfil, tests y Swagger
+- [x] **Fase 2.** Evaluador de ofertas con la API de Claude
+- [x] **Fase 3.** Generador de CV compatible con ATS
+- [x] **Fase 4.** App React Native
+- [ ] **Fase 5.** Despliegue en Railway
+- [ ] **Fase 6.** Publicación en Google Play
+
+El detalle está en la [hoja de ruta](docs/hoja-de-ruta.md).
+
+---
+
+## 📚 Documentación
+
+| Documento | Contenido |
+|---|---|
+| [Arquitectura](docs/arquitectura.md) | Piezas, modelo de datos, flujos y pruebas |
+| [Decisiones](docs/decisiones.md) | Qué se eligió y por qué |
+| [Seguridad](docs/seguridad.md) | Riesgos, medidas y la prueba que cubre cada una |
+| [Interfaz](docs/ux.md) | Principios, pantallas, onboarding y accesibilidad |
+| [Privacidad](docs/privacidad.md) | Borrador de política para Google Play |
+| [Cómo contribuir](CONTRIBUTING.md) | Ramas, commits y pull requests |
+| [Cambios](CHANGELOG.md) | Historial de versiones |
+
+---
+
+## 👤 Autor
+
+**Alberto** · [GitHub](https://github.com/albertocll)
