@@ -2,8 +2,8 @@
 
 > **Asesor de empleo con IA para Android.** Guarda tus candidaturas, pega una oferta y te dice con un semáforo si encaja contigo, y genera un CV para ATS adaptado a esa oferta sin inventar nada.
 
-[![CI](https://github.com/albertocll/luz-verde/actions/workflows/ci.yml/badge.svg)](https://github.com/albertocll/luz-verde/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/albertocll/luz-verde/actions/workflows/codeql.yml/badge.svg)](https://github.com/albertocll/luz-verde/actions/workflows/codeql.yml)
+[![CI](https://github.com/albertocll/LuzVerde/actions/workflows/ci.yml/badge.svg)](https://github.com/albertocll/LuzVerde/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/albertocll/LuzVerde/actions/workflows/codeql.yml/badge.svg)](https://github.com/albertocll/LuzVerde/actions/workflows/codeql.yml)
 [![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
@@ -112,7 +112,7 @@ La clave de la API de Claude vive solo en el servidor. La app nunca la ve. Más 
 ## 📁 Estructura del repositorio
 
 ```
-luz-verde/
+LuzVerde/
 ├── backend/                 API REST en Spring Boot
 │   └── src/main/java/es/albertocll/luzverde/
 │       ├── auth/            Registro, login y límite de intentos
@@ -149,8 +149,8 @@ luz-verde/
 
 1. Clona el repositorio:
    ```bash
-   git clone https://github.com/albertocll/luz-verde.git
-   cd luz-verde
+   git clone https://github.com/albertocll/LuzVerde.git
+   cd LuzVerde
    ```
 
 2. Copia `.env.example` como `.env` y rellena `DB_PASSWORD` y `JWT_SECRET`. Para la clave JWT vale `openssl rand -base64 48`. Si quieres usar la IA, añade `ANTHROPIC_API_KEY`.
