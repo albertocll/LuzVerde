@@ -118,7 +118,8 @@ class EvaluacionIntegrationTest extends TestBase {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo(OFERTA)))
                 .andExpect(status().isTooManyRequests())
-                .andExpect(jsonPath("$.detail", containsString("10")));
+                .andExpect(jsonPath("$.detail", containsString("10")))
+                .andExpect(jsonPath("$.code").value("AI_DAILY_LIMIT"));
 
         // Otro usuario tiene su propio contador.
         mvc.perform(post("/api/v1/evaluaciones")

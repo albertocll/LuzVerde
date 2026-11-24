@@ -16,6 +16,8 @@ export class ErrorApi extends Error {
     message: string,
     readonly estado: number,
     readonly campos: Record<string, string> = {},
+    /** Código fijo del backend, como EMAIL_TAKEN. Null si la respuesta no lo trae. */
+    readonly codigo: string | null = null,
   ) {
     super(message);
   }
@@ -32,10 +34,28 @@ export function alExpirarSesion(callback: () => void) {
   alCaducarSesion = callback;
 }
 
+/**
+ * Mensajes por el code que manda el backend. La app elige el texto por el código,
+ * así un cambio de redacción en el servidor no cambia lo que ve el usuario.
+ */
+export const MENSAJES_POR_CODIGO: Record<string, string> = {
+  EMAIL_TAKEN: 'Ya hay una cuenta con ese email. Prueba a entrar.',
+  INVALID_CREDENTIALS: 'El email o la contraseña no son correctos.',
+  TOO_MANY_ATTEMPTS: 'Demasiados intentos. Espera unos minutos y vuelve a probar.',
+  AI_DAILY_LIMIT: 'Has llegado al límite de usos de IA por hoy. Vuelve mañana.',
+  AI_NOT_CONFIGURED: 'El servidor no tiene la IA configurada todavía.',
+  AI_FAILED: 'El servicio de IA ha fallado. Prueba otra vez en un rato.',
+  VALIDATION_ERROR: 'Revisa los campos marcados.',
+  MALFORMED_REQUEST: 'La app ha enviado algo que el servidor no entiende. Actualiza la app.',
+  NOT_FOUND: 'No se ha encontrado.',
+  INTERNAL_ERROR: 'Ha fallado el servidor. Inténtalo de nuevo más tarde.',
+};
+
+/** Solo para respuestas sin code, como el 401 de un token caducado. */
 const MENSAJES: Record<number, string> = {
   401: 'Tu sesión ha caducado. Vuelve a entrar.',
   404: 'No se ha encontrado.',
-  429: 'Has llegado al límite de usos de IA por hoy.',
+  429: 'Demasiadas peticiones. Espera un poco y vuelve a probar.',
   502: 'El servicio de IA ha fallado. Prueba otra vez en un rato.',
   503: 'El servidor no tiene la IA configurada todavía.',
 };
@@ -71,11 +91,13 @@ async function peticion<T>(ruta: string, opciones: RequestInit = {}): Promise<T>
     if (respuesta.status === 401 && token && !ruta.startsWith('/auth/')) {
       alCaducarSesion?.();
     }
+    const codigo = typeof datos?.code === 'string' ? datos.code : null;
     const detalle = typeof datos?.detail === 'string' ? datos.detail : null;
     throw new ErrorApi(
-      detalle ?? MENSAJES[respuesta.status] ?? `Error ${respuesta.status}`,
+      (codigo ? MENSAJES_POR_CODIGO[codigo] : undefined) ?? detalle ?? MENSAJES[respuesta.status] ?? `Error ${respuesta.status}`,
       respuesta.status,
       datos?.campos ?? {},
+      codigo,
     );
   }
   return datos as T;

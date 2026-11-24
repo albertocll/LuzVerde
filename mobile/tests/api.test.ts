@@ -65,10 +65,25 @@ describe('api', () => {
     expect(error.campos.empresa).toBe('La empresa es obligatoria');
   });
 
-  it('traduce el límite de IA a un mensaje claro', async () => {
-    fetchSimulado.mockResolvedValue(respuesta(429));
+  it('elige el mensaje por el code y no por el texto del servidor', async () => {
+    fetchSimulado.mockResolvedValue(respuesta(429, { code: 'AI_DAILY_LIMIT', detail: 'texto que puede cambiar' }));
 
-    await expect(api.evaluar('oferta')).rejects.toThrow('límite de usos de IA');
+    const error = await api.evaluar('oferta').catch((e) => e);
+
+    expect(error.codigo).toBe('AI_DAILY_LIMIT');
+    expect(error.message).toContain('límite de usos de IA');
+  });
+
+  it('distingue los intentos de login del límite de IA aunque los dos sean 429', async () => {
+    fetchSimulado.mockResolvedValue(respuesta(429, { code: 'TOO_MANY_ATTEMPTS', detail: 'x' }));
+
+    await expect(api.login('a@b.com', 'x')).rejects.toThrow('Demasiados intentos');
+  });
+
+  it('usa el texto del servidor si el code es desconocido', async () => {
+    fetchSimulado.mockResolvedValue(respuesta(409, { code: 'CODIGO_NUEVO', detail: 'Mensaje del servidor' }));
+
+    await expect(api.perfil()).rejects.toThrow('Mensaje del servidor');
   });
 
   it('avisa cuando no hay conexión con el servidor', async () => {

@@ -26,6 +26,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 ### cambiado
 
 - La API pasa a `/api/v1`. La app ya usa las rutas nuevas.
+- Cada respuesta de error lleva un `code` fijo (`EMAIL_TAKEN`, `AI_DAILY_LIMIT`...). La app elige su mensaje por él, así que un 429 del login ya no dice que se acabó la IA.
 
 ### seguridad
 

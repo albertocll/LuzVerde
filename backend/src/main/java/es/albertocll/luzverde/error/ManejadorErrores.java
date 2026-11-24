@@ -22,45 +22,46 @@ import java.util.Map;
 public class ManejadorErrores {
 
     private static final Logger log = LoggerFactory.getLogger(ManejadorErrores.class);
+    private static final String CODIGO = "code";
 
     @ExceptionHandler(NoEncontradoException.class)
     public ProblemDetail noEncontrado(NoEncontradoException e) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
+        return problema(HttpStatus.NOT_FOUND, "NOT_FOUND", e.getMessage());
     }
 
     @ExceptionHandler(ConflictoException.class)
     public ProblemDetail conflicto(ConflictoException e) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
+        return problema(HttpStatus.CONFLICT, e.getCodigo(), e.getMessage());
     }
 
     @ExceptionHandler(CredencialesInvalidasException.class)
     public ProblemDetail credenciales(CredencialesInvalidasException e) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, e.getMessage());
+        return problema(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", e.getMessage());
     }
 
     @ExceptionHandler(DemasiadosIntentosException.class)
     public ProblemDetail demasiadosIntentos(DemasiadosIntentosException e) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, e.getMessage());
+        return problema(HttpStatus.TOO_MANY_REQUESTS, "TOO_MANY_ATTEMPTS", e.getMessage());
     }
 
     @ExceptionHandler(LimiteSuperadoException.class)
     public ProblemDetail limite(LimiteSuperadoException e) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, e.getMessage());
+        return problema(HttpStatus.TOO_MANY_REQUESTS, "AI_DAILY_LIMIT", e.getMessage());
     }
 
     @ExceptionHandler(IaNoConfiguradaException.class)
     public ProblemDetail iaNoConfigurada(IaNoConfiguradaException e) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
+        return problema(HttpStatus.SERVICE_UNAVAILABLE, "AI_NOT_CONFIGURED", e.getMessage());
     }
 
     @ExceptionHandler(IaException.class)
     public ProblemDetail ia(IaException e) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_GATEWAY, e.getMessage());
+        return problema(HttpStatus.BAD_GATEWAY, "AI_FAILED", e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail validacion(MethodArgumentNotValidException e) {
-        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Datos no válidos");
+        ProblemDetail problema = problema(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Datos no válidos");
         Map<String, String> campos = new LinkedHashMap<>();
         e.getBindingResult().getFieldErrors()
                 .forEach(err -> campos.putIfAbsent(err.getField(), err.getDefaultMessage()));
@@ -70,7 +71,7 @@ public class ManejadorErrores {
 
     @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
     public ProblemDetail peticionIlegible(Exception e) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "La petición tiene un formato incorrecto");
+        return problema(HttpStatus.BAD_REQUEST, "MALFORMED_REQUEST", "La petición tiene un formato incorrecto");
     }
 
     /**
@@ -80,10 +81,23 @@ public class ManejadorErrores {
     @ExceptionHandler(Exception.class)
     public ProblemDetail inesperado(Exception e) {
         if (e instanceof ErrorResponse respuesta) {
-            return respuesta.getBody();
+            ProblemDetail cuerpo = respuesta.getBody();
+            HttpStatus estado = HttpStatus.resolve(cuerpo.getStatus());
+            cuerpo.setProperty(CODIGO, estado != null ? estado.name() : "HTTP_" + cuerpo.getStatus());
+            return cuerpo;
         }
         log.error("Error no controlado", e);
-        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR,
+        return problema(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR",
                 "Ha ocurrido un error inesperado. Inténtalo de nuevo más tarde.");
+    }
+
+    /**
+     * Todas las respuestas de error llevan {@code code}: un texto fijo en MAYÚSCULAS que no cambia
+     * aunque cambie el mensaje. La app elige su mensaje por {@code code}, nunca por el texto.
+     */
+    private static ProblemDetail problema(HttpStatus estado, String codigo, String mensaje) {
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(estado, mensaje);
+        problema.setProperty(CODIGO, codigo);
+        return problema;
     }
 }
