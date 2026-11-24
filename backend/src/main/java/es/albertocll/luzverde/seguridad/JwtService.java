@@ -16,6 +16,10 @@ import java.util.Optional;
 @Service
 public class JwtService {
 
+    /** Quién firma el token y para quién es. Un token de otro sistema con la misma clave no vale. */
+    static final String EMISOR = "luz-verde";
+    static final String DESTINATARIO = "luz-verde-app";
+
     private final SecretKey clave;
     private final long expiracionMinutos;
 
@@ -34,6 +38,8 @@ public class JwtService {
     public String generarToken(Long usuarioId, String email) {
         Instant ahora = Instant.now();
         return Jwts.builder()
+                .issuer(EMISOR)
+                .audience().add(DESTINATARIO).and()
                 .subject(String.valueOf(usuarioId))
                 .claim("email", email)
                 .issuedAt(Date.from(ahora))
@@ -50,6 +56,8 @@ public class JwtService {
         try {
             Claims claims = Jwts.parser()
                     .verifyWith(clave)
+                    .requireIssuer(EMISOR)
+                    .requireAudience(DESTINATARIO)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();

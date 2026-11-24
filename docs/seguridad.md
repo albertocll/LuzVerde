@@ -11,7 +11,8 @@ La app guarda nombre, email, contraseña (solo su hash BCrypt), perfil profesion
 | Riesgo | Medida | Prueba automática |
 |---|---|---|
 | Ver o cambiar datos de otro usuario | Toda consulta filtra por el id del token. Lo ajeno responde 404 | `cadaUsuarioSoloVeLoSuyo`, `losCvSonPrivados`, `lasEvaluacionesSonPrivadas`, `elPerfilEsPrivado` |
-| Token falsificado o manipulado | Firma HS256 verificada en cada petición. Se rechaza `alg: none` | `tokenConFirmaAlteradaEsRechazado`, `tokenSinFirmaAlgNoneEsRechazado`, `JwtServiceTest` |
+| Token falsificado o manipulado | Firma HS256, emisor (`luz-verde`) y destinatario (`luz-verde-app`) verificados en cada petición. Se rechaza `alg: none` | `tokenConFirmaAlteradaEsRechazado`, `tokenSinFirmaAlgNoneEsRechazado`, `rechazaTokenSinEmisorNiDestinatario` |
+| Mapa de la API expuesto en producción | Swagger apagado salvo con `SWAGGER_ENABLED=true`. Docker Compose local lo activa | `swaggerEstaApagadoPorDefecto` |
 | Fuerza bruta contra el login | 5 fallos por email o 20 por IP en 15 minutos devuelven 429 | `fuerzaBrutaContraUnaCuentaSeBloquea`, `LimiteLoginServiceTest` |
 | Llenar la memoria del servidor probando miles de emails | Con más de 10.000 claves se borran las caducadas, como mucho una vez por minuto | `probarMilesDeEmailsNoLlenaLaMemoria` |
 | IP falseada con `X-Forwarded-For` | Por defecto se ignora la cabecera. Detrás de Railway, `FORWARD_HEADERS_STRATEGY=native` solo la acepta de proxies internos | Revisión de código |
@@ -36,6 +37,5 @@ La app guarda nombre, email, contraseña (solo su hash BCrypt), perfil profesion
 - Forzar HTTPS en producción. Railway lo sirve por HTTPS y la app debe apuntar a esa URL (fase 5).
 - Poner `FORWARD_HEADERS_STRATEGY=native` en Railway, para que el límite por IP use la IP real (fase 5).
 - Cambiar `ddl-auto: update` por migraciones con Flyway antes de tener datos reales.
-- Decidir si Swagger UI queda público en producción.
 - Borrado de cuenta y exportación de datos, que pide Google Play y el RGPD (fase 6).
 - Revisar la política de privacidad ([borrador](privacidad.md)) antes de publicar.

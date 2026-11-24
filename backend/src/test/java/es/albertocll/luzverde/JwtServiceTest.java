@@ -2,9 +2,12 @@ package es.albertocll.luzverde;
 
 import es.albertocll.luzverde.seguridad.JwtProperties;
 import es.albertocll.luzverde.seguridad.JwtService;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.Test;
 
 import java.util.Base64;
+import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,6 +39,20 @@ class JwtServiceTest {
 
         assertThat(receptor.validar(emisor.generarToken(1L, "a@b.com"))).isEmpty();
         assertThat(receptor.validar("basura")).isEmpty();
+    }
+
+    @Test
+    void rechazaTokenSinEmisorNiDestinatario() {
+        String clave = claveDe(32);
+        JwtService servicio = new JwtService(new JwtProperties(clave, 60));
+        String ajeno = Jwts.builder()
+                .subject("1")
+                .claim("email", "a@b.com")
+                .expiration(new Date(System.currentTimeMillis() + 60_000))
+                .signWith(Keys.hmacShaKeyFor(Base64.getDecoder().decode(clave)))
+                .compact();
+
+        assertThat(servicio.validar(ajeno)).isEmpty();
     }
 
     @Test

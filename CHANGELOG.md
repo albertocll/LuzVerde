@@ -28,6 +28,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ### seguridad
 
+- Swagger queda apagado salvo con `SWAGGER_ENABLED=true`. Docker Compose local lo activa.
+- El token JWT lleva emisor y destinatario, y el backend los comprueba.
 - El límite de login borra las claves caducadas para que probar miles de emails no llene la memoria.
 - El login rechaza emails y contraseñas más largos de lo que admite el registro.
 - `X-Forwarded-For` se ignora salvo que se active `FORWARD_HEADERS_STRATEGY=native` detrás de un proxy.

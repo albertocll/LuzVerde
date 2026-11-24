@@ -28,6 +28,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      SWAGGER_ENABLED: "true"
     ports:
       - "8080:8080"
 
