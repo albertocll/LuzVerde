@@ -8,6 +8,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 - Vista previa web de la app y modo demo con datos inventados (`npm run web:demo`), fuera de la build de producción.
 - README con mockup, capturas y diagrama de arquitectura.
+- GIF de la demo, CV en PDF de ejemplo, Swagger UI e informe de cobertura en el README.
 
 - Límite de intentos de login: 5 fallos por email o 20 por IP en 15 minutos.
 - Endpoint `/actuator/health` para el despliegue.

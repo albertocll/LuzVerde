@@ -29,6 +29,12 @@ Proyecto de portfolio de Alberto ([github.com/albertocll](https://github.com/alb
 
 ## 📱 Pantallas
 
+<p align="center">
+  <img src="docs/img/demo.gif" alt="Recorrido por la app: login, candidaturas, evaluación de una oferta con semáforo verde, CV adaptado y perfil" width="320">
+</p>
+
+<p align="center"><em>Login, candidaturas, evaluación de una oferta, CV adaptado y perfil, en 19 segundos.</em></p>
+
 | Candidaturas | Evaluar oferta | Resultado | CV adaptado | Perfil |
 |:---:|:---:|:---:|:---:|:---:|
 | ![Candidaturas](docs/img/candidaturas.png) | ![Evaluar](docs/img/evaluar.png) | ![Evaluación verde](docs/img/evaluacion.png) | ![CV](docs/img/cv.png) | ![Perfil](docs/img/perfil.png) |
@@ -122,6 +128,8 @@ luz-verde/
 │   ├── src/componentes/     Semáforo, avisos y componentes de interfaz
 │   └── src/demo/            API falsa del modo demo (solo web:demo)
 ├── docs/                    Arquitectura, decisiones, seguridad, interfaz y privacidad
+│   └── img/                 Mockup, GIF de la demo y capturas del README
+├── web/                     Página de presentación (Netlify)
 ├── .github/                 CI, CodeQL, Dependabot y plantillas
 ├── docker-compose.yml       PostgreSQL y backend para desarrollo local
 └── .env.example             Variables de entorno de ejemplo
@@ -203,6 +211,8 @@ npm test
 
 Los tests del backend usan H2 en memoria y simulan la API de Claude: no necesitan Docker, PostgreSQL ni créditos. El informe de cobertura queda en `backend/target/site/jacoco/index.html`.
 
+![Informe de JaCoCo con la cobertura por paquete: 94 % de las líneas](docs/img/cobertura.png)
+
 ---
 
 ## 🚦 Evaluador de ofertas
@@ -229,9 +239,22 @@ Cómo se asegura que no inventa nada, sin fiarse solo del modelo:
 - Cualquier frase que nombre una tecnología que pide la oferta y que no tienes se elimina del CV y de la carta, y esa tecnología pasa a la lista de huecos.
 - Las experiencias y proyectos que el modelo no use se añaden igualmente con tu texto.
 
+Así queda el PDF, generado por `RenderizadorPdf` con un perfil de ejemplo:
+
+<p align="center">
+  <img src="docs/img/cv-pdf.png" alt="CV en PDF de una sola columna con apartados Perfil, Tecnologías, Experiencia, Proyectos, Formación e Idiomas" width="560">
+</p>
+
 ---
 
 ## 🔌 API
+
+<details>
+<summary>Ver la documentación de Swagger UI</summary>
+
+![Swagger UI con los endpoints de perfil, candidaturas, evaluaciones, CV y autenticación](docs/img/swagger.png)
+
+</details>
 
 Todas las rutas salvo `/auth/**`, Swagger y `/actuator/health` piden la cabecera `Authorization: Bearer <token>`. Cada usuario solo ve sus datos: lo ajeno responde 404, igual que si no existiera.
 

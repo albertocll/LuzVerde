@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
         info = @Info(
                 title = "Luz Verde API",
                 version = "0.1.0",
-                description = "Asesor de empleo: candidaturas y perfil del usuario"),
+                description = "Asesor de empleo: candidaturas, perfil, evaluación de ofertas con IA y CV adaptados para ATS"),
         security = @SecurityRequirement(name = "bearerAuth"))
 @SecurityScheme(
         name = "bearerAuth",
