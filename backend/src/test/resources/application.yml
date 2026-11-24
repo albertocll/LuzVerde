@@ -9,6 +9,8 @@ spring:
       ddl-auto: create-drop
 
 luzverde:
+  app:
+    version-minima: 1.2.3
   jwt:
     # Clave falsa solo para tests. No se usa en ningún entorno real.
     secreto: dGVzdC1zb2xvLXBhcmEtdGVzdHMtbm8tdXNhci1lbi1wcm9kdWNjaW9uLTEyMzQ1Njc4

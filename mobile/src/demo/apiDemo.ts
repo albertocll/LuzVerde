@@ -25,6 +25,7 @@ function buscar(id: number): Candidatura {
 }
 
 export const apiDemo: typeof apiReal = {
+  versionMinima: async () => pausa({ versionMinima: '1.0.0' }),
   login: async () => pausa(sesionDemo()),
   registro: async (nombre) => pausa(sesionDemo(nombre || undefined)),
 

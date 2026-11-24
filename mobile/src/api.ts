@@ -98,6 +98,8 @@ interface RespuestaToken {
 }
 
 const apiServidor = {
+  versionMinima: () => peticion<{ versionMinima: string }>('/version'),
+
   async login(email: string, password: string): Promise<Sesion> {
     const r = await peticion<RespuestaToken>('/auth/login', { method: 'POST', body: json({ email, password }) });
     return { token: r.token, usuarioId: r.usuarioId, nombre: r.nombre };
