@@ -1,0 +1,24 @@
+name: Mejora
+description: Propón una función nueva o un cambio
+labels: [mejora]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Problema que resuelve
+      description: Qué le cuesta hoy a quien usa la app.
+    validations:
+      required: true
+  - type: textarea
+    id: propuesta
+    attributes:
+      label: Propuesta
+    validations:
+      required: true
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Criterios de aceptación
+      placeholder: |
+        - [ ] ...
+        - [ ] ...

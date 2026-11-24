@@ -1,0 +1,11 @@
+# Configuración de gitleaks: reglas por defecto más una excepción para valores falsos de los tests.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Claves falsas usadas solo en tests"
+paths = [
+  '''backend/src/test/resources/application\.yml''',
+  '''backend/src/test/java/.*''',
+  '''mobile/tests/.*''',
+]
