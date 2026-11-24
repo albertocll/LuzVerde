@@ -6,8 +6,9 @@ services:
       POSTGRES_DB: luzverde
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+    # Solo accesible desde este ordenador, no desde la red local.
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - datos-postgres:/var/lib/postgresql/data
     healthcheck:

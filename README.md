@@ -162,6 +162,7 @@ Cada usuario solo ve y modifica sus datos. Si pides una candidatura de otro usua
 | `JWT_SECRET` | Sí | Clave en Base64 de al menos 32 bytes para firmar los tokens |
 | `JWT_EXPIRACION_MINUTOS` | No | Duración del token. Por defecto 1440 (un día) |
 | `PORT` | No | Puerto HTTP. Por defecto 8080 |
+| `FORWARD_HEADERS_STRATEGY` | No | `native` detrás del proxy de Railway. Por defecto `none` |
 | `ANTHROPIC_API_KEY` | Para usar la IA | Clave de la API de Claude |
 | `ANTHROPIC_MODELO` | No | Modelo. Por defecto `claude-haiku-5-5` |
 | `ANTHROPIC_MAX_TOKENS` | No | Tope de tokens de salida por llamada. Por defecto 2048 |

@@ -18,10 +18,17 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>Cuenta los fallos recientes por email y por IP en memoria. Si se pasa del límite dentro de la
  * ventana, el login responde 429 aunque la contraseña sea correcta, hasta que caduquen los fallos.
  * Al ser memoria local vale para una sola instancia, que es lo que tiene este proyecto.</p>
+ *
+ * <p>Para que nadie pueda llenar la memoria probando miles de emails distintos, cuando hay más de
+ * {@value #LIMPIAR_A_PARTIR_DE} claves se borran las que ya no tienen fallos dentro de la ventana,
+ * como mucho una vez por minuto.</p>
  */
 @Service
 public class LimiteLoginService {
 
+    static final int LIMPIAR_A_PARTIR_DE = 10_000;
+
+    private volatile Instant ultimaLimpieza = Instant.EPOCH;
     private final Map<String, Deque<Instant>> fallos = new ConcurrentHashMap<>();
     private final Clock reloj;
     private final int maxPorEmail;
@@ -48,6 +55,23 @@ public class LimiteLoginService {
         Instant ahora = reloj.instant();
         fallos.computeIfAbsent(claveEmail(email), k -> new ArrayDeque<>()).add(ahora);
         fallos.computeIfAbsent(claveIp(ip), k -> new ArrayDeque<>()).add(ahora);
+        if (fallos.size() > LIMPIAR_A_PARTIR_DE && ahora.isAfter(ultimaLimpieza.plusSeconds(60))) {
+            ultimaLimpieza = ahora;
+            limpiarCaducados();
+        }
+    }
+
+    /** Número de claves guardadas. Solo para tests. */
+    int clavesGuardadas() {
+        return fallos.size();
+    }
+
+    private void limpiarCaducados() {
+        for (String clave : fallos.keySet()) {
+            if (recientes(clave) == 0) {
+                fallos.remove(clave);
+            }
+        }
     }
 
     public void registrarExito(String email) {

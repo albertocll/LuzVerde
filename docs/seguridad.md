@@ -12,7 +12,10 @@ La app guarda nombre, email, contraseña (solo su hash BCrypt), perfil profesion
 |---|---|---|
 | Ver o cambiar datos de otro usuario | Toda consulta filtra por el id del token. Lo ajeno responde 404 | `cadaUsuarioSoloVeLoSuyo`, `losCvSonPrivados`, `lasEvaluacionesSonPrivadas`, `elPerfilEsPrivado` |
 | Token falsificado o manipulado | Firma HS256 verificada en cada petición. Se rechaza `alg: none` | `tokenConFirmaAlteradaEsRechazado`, `tokenSinFirmaAlgNoneEsRechazado`, `JwtServiceTest` |
-| Fuerza bruta contra el login | 5 fallos por email o 20 por IP en 15 minutos devuelven 429 | `fuerzaBrutaContraUnaCuentaSeBloquea` |
+| Fuerza bruta contra el login | 5 fallos por email o 20 por IP en 15 minutos devuelven 429 | `fuerzaBrutaContraUnaCuentaSeBloquea`, `LimiteLoginServiceTest` |
+| Llenar la memoria del servidor probando miles de emails | Con más de 10.000 claves se borran las caducadas, como mucho una vez por minuto | `probarMilesDeEmailsNoLlenaLaMemoria` |
+| IP falseada con `X-Forwarded-For` | Por defecto se ignora la cabecera. Detrás de Railway, `FORWARD_HEADERS_STRATEGY=native` solo la acepta de proxies internos | Revisión de código |
+| Base de datos accesible desde la red local | Docker Compose publica PostgreSQL solo en `127.0.0.1` | Revisión de código |
 | Saber qué emails están registrados por el tiempo de respuesta | Se compara la contraseña también cuando el email no existe | Revisión de código |
 | Asignación masiva de campos | Los DTO solo aceptan campos editables. El dueño sale del token | `asignacionMasivaNoPermiteElegirIdNiDueno` |
 | Inyección SQL | Consultas de Spring Data con parámetros. Los enums se validan | `entradasMaliciosasNoRompenNadaNiFiltranTrazas` |
@@ -31,6 +34,8 @@ La app guarda nombre, email, contraseña (solo su hash BCrypt), perfil profesion
 ## pendiente
 
 - Forzar HTTPS en producción. Railway lo sirve por HTTPS y la app debe apuntar a esa URL (fase 5).
-- Confiar en la cabecera `X-Forwarded-For` solo del proxy de Railway, para que el límite por IP use la IP real.
+- Poner `FORWARD_HEADERS_STRATEGY=native` en Railway, para que el límite por IP use la IP real (fase 5).
+- Cambiar `ddl-auto: update` por migraciones con Flyway antes de tener datos reales.
+- Decidir si Swagger UI queda público en producción.
 - Borrado de cuenta y exportación de datos, que pide Google Play y el RGPD (fase 6).
 - Revisar la política de privacidad ([borrador](privacidad.md)) antes de publicar.
