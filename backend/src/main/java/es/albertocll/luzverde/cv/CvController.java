@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/cv")
+@RequestMapping("/api/v1/cv")
 @Tag(name = "CV")
 public class CvController {
 

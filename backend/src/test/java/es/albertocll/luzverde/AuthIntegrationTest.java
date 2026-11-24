@@ -20,7 +20,7 @@ class AuthIntegrationTest extends TestBase {
 
     @Test
     void registroDevuelveToken() throws Exception {
-        mvc.perform(post("/auth/registro")
+        mvc.perform(post("/api/v1/auth/registro")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpoRegistro(emailUnico(), "contrasena-segura")))
                 .andExpect(status().isCreated())
@@ -32,18 +32,18 @@ class AuthIntegrationTest extends TestBase {
     @Test
     void registroConEmailRepetidoDa409() throws Exception {
         String email = emailUnico();
-        mvc.perform(post("/auth/registro").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpoRegistro(email, "contrasena-segura")))
                 .andExpect(status().isCreated());
 
-        mvc.perform(post("/auth/registro").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpoRegistro(email.toUpperCase(), "otra-contrasena")))
                 .andExpect(status().isConflict());
     }
 
     @Test
     void registroConDatosMalosDa400() throws Exception {
-        mvc.perform(post("/auth/registro").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpoRegistro("esto-no-es-un-email", "corta")))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.campos.email", notNullValue()))
@@ -53,24 +53,24 @@ class AuthIntegrationTest extends TestBase {
     @Test
     void loginCorrectoEIncorrecto() throws Exception {
         String email = emailUnico();
-        mvc.perform(post("/auth/registro").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpoRegistro(email, "contrasena-segura")))
                 .andExpect(status().isCreated());
 
-        mvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"email": "%s", "password": "contrasena-segura"}
                                 """.formatted(email)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token", notNullValue()));
 
-        mvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"email": "%s", "password": "mala"}
                                 """.formatted(email)))
                 .andExpect(status().isUnauthorized());
 
-        mvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"email": "nadie@ejemplo.com", "password": "contrasena-segura"}
                                 """))
@@ -79,10 +79,10 @@ class AuthIntegrationTest extends TestBase {
 
     @Test
     void sinTokenOConTokenFalsoDa401() throws Exception {
-        mvc.perform(get("/candidaturas"))
+        mvc.perform(get("/api/v1/candidaturas"))
                 .andExpect(status().isUnauthorized());
 
-        mvc.perform(get("/candidaturas").header(HttpHeaders.AUTHORIZATION, "Bearer token-inventado"))
+        mvc.perform(get("/api/v1/candidaturas").header(HttpHeaders.AUTHORIZATION, "Bearer token-inventado"))
                 .andExpect(status().isUnauthorized());
     }
 

@@ -20,7 +20,7 @@ public final class CvDtos {
 
         static CvResponse de(Cv cv) {
             return new CvResponse(cv.getId(), cv.getEmpresa(), cv.getPuesto(), cv.getHuecos(), cv.getCarta(),
-                    cv.getCreadoEn(), "/cv/" + cv.getId() + "/pdf", "/cv/" + cv.getId() + "/docx");
+                    cv.getCreadoEn(), "/api/v1/cv/" + cv.getId() + "/pdf", "/api/v1/cv/" + cv.getId() + "/docx");
         }
     }
 }

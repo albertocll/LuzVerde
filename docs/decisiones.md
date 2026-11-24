@@ -67,3 +67,9 @@ Para enseñar la app sin backend ni móvil, `npm run web:demo` la abre en el nav
 Fecha: 2026-11-24
 
 Los mensajes siguen [Conventional Commits](https://www.conventionalcommits.org/es/v1.0.0/) en español (`feat(mobile): ...`, `fix(seguridad): ...`, `docs: ...`). Así el historial se lee por área y el CHANGELOG se escribe casi solo.
+
+## 12. versión de la API en la ruta
+
+Fecha: 2026-11-24
+
+Todas las rutas de la API cuelgan de `/api/v1`. Se cambió antes de publicar, cuando aún no había usuarios. Si un cambio rompe versiones antiguas de la app, irá en `/api/v2` y `/api/v1` seguirá viva hasta que la mayoría actualice. `/actuator/health` y Swagger quedan fuera del prefijo porque no son parte del contrato con la app.

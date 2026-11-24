@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/evaluaciones")
+@RequestMapping("/api/v1/evaluaciones")
 @Tag(name = "Evaluaciones")
 public class EvaluacionController {
 

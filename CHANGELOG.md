@@ -9,7 +9,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 - Vista previa web de la app y modo demo con datos inventados (`npm run web:demo`), fuera de la build de producción.
 - README con mockup, capturas y diagrama de arquitectura.
 - GIF de la demo, CV en PDF de ejemplo, Swagger UI e informe de cobertura en el README.
-- Borrar la cuenta y todos sus datos desde Perfil (`DELETE /cuenta`). El token de una cuenta borrada deja de valer.
+- Borrar la cuenta y todos sus datos desde Perfil (`DELETE /api/v1/cuenta`). El token de una cuenta borrada deja de valer.
 
 - Límite de intentos de login: 5 fallos por email o 20 por IP en 15 minutos.
 - Endpoint `/actuator/health` para el despliegue.
@@ -21,6 +21,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 - Mejoras de accesibilidad: roles, estados y etiquetas en botones, chips, campos y semáforo.
 - CI en GitHub Actions, CodeQL, búsqueda de secretos con gitleaks y Dependabot.
 - Documentación: arquitectura, decisiones, seguridad, interfaz y borrador de política de privacidad.
+
+### cambiado
+
+- La API pasa a `/api/v1`. La app ya usa las rutas nuevas.
 
 ### seguridad
 

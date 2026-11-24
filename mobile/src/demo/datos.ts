@@ -141,7 +141,7 @@ export const cvsDemo: Cv[] = [
     carta:
       'Hola, equipo de Norte Digital. Soy desarrollador backend con Java y Spring Boot. En mis prácticas en Consultora Prisma hice una API REST con tests de integración, y en Luz Verde he montado un backend con PostgreSQL y Docker. Me encaja el puesto porque trabajáis con el mismo stack. Me gustaría contaros más en una entrevista.',
     creadoEn: '2026-11-18T09:20:00Z',
-    urlPdf: '/cv/1/pdf',
-    urlDocx: '/cv/1/docx',
+    urlPdf: '/api/v1/cv/1/pdf',
+    urlDocx: '/api/v1/cv/1/docx',
   },
 ];

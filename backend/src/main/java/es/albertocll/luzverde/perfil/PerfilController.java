@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/perfil")
+@RequestMapping("/api/v1/perfil")
 @Tag(name = "Perfil")
 public class PerfilController {
 

@@ -33,7 +33,7 @@ public abstract class TestBase {
         String cuerpo = """
                 {"email": "%s", "password": "contrasena-segura", "nombre": "Prueba"}
                 """.formatted(emailUnico());
-        MvcResult resultado = mvc.perform(post("/auth/registro")
+        MvcResult resultado = mvc.perform(post("/api/v1/auth/registro")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo))
                 .andExpect(status().isCreated())
