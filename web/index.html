@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" href="favicon.png">
+<meta property="og:title" content="Luz Verde">
+<meta property="og:description" content="Pega una oferta de empleo y te dice si encaja con tu perfil. App Android con Spring Boot, Expo y Claude.">
+<title>Luz Verde</title>
+<meta name="description" content="Luz Verde evalúa ofertas de empleo contra tu perfil con un semáforo y genera un CV adaptado que no inventa nada. App Android con Spring Boot y Expo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: una columna editorial con un semáforo vivo como héroe; bandas de color a ancho completo, contenido a 1120px. */
+:root{
+  --bg:#F4F7F5; --surface:#FFFFFF; --ink:#0E1B16; --muted:#5B6B64; --line:#DDE6E1;
+  --pine:#0F3D2E; --pine-ink:#E9F5EE; --mint:#A7F3D0;
+  --go:#16A34A; --wait:#D97706; --stop:#DC2626; --off:#2B3A34;
+  --go-soft:#DCFCE7; --wait-soft:#FEF3C7; --stop-soft:#FEE2E2;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B1612; --surface:#12211B; --ink:#E7EFEA; --muted:#9AAEA5; --line:#22362D;
+  --pine:#0F3D2E; --pine-ink:#E9F5EE; --mint:#86EFAC;
+  --go:#22C55E; --wait:#F59E0B; --stop:#EF4444; --off:#22302A;
+  --go-soft:#123322; --wait-soft:#3A2A0C; --stop-soft:#3A1414; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B1612; --surface:#12211B; --ink:#E7EFEA; --muted:#9AAEA5; --line:#22362D;
+  --pine:#0F3D2E; --pine-ink:#E9F5EE; --mint:#86EFAC;
+  --go:#22C55E; --wait:#F59E0B; --stop:#EF4444; --off:#22302A;
+  --go-soft:#123322; --wait-soft:#3A2A0C; --stop-soft:#3A1414; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.6 var(--body);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--pine)}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--go);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:-.02em}
+h2{font-size:clamp(2rem,4.4vw,3.1rem);line-height:1.05;font-weight:800}
+h3{font-size:1.3rem;font-weight:700;line-height:1.2}
+p{margin:0}
+.eyebrow{font:500 .78rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.lead{font-size:1.15rem;color:var(--muted);max-width:60ch}
+section{padding-block:clamp(64px,9vw,112px)}
+.sec-head{display:grid;gap:14px;margin-bottom:44px;max-width:720px}
+
+/* cabecera */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--pine);color:var(--pine-ink)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:14px}
+.brand{display:flex;align-items:center;gap:10px;font:800 1.15rem var(--display);text-decoration:none;letter-spacing:-.01em}
+.mini{display:inline-flex;gap:3px;padding:4px 5px;background:#071F17;border-radius:99px}
+.mini i{width:7px;height:7px;border-radius:50%;background:#1E3A30}
+.mini i:last-child{background:#22C55E;box-shadow:0 0 8px #22C55E}
+.top nav{display:flex;gap:22px;font-size:.95rem}
+.top nav a{text-decoration:none;opacity:.85}
+.top nav a:hover{opacity:1;text-decoration:underline;text-underline-offset:4px}
+@media (max-width:720px){.top nav a:not(.gh){display:none}}
+
+/* héroe */
+.hero{background:var(--pine);color:var(--pine-ink);overflow:hidden}
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center;padding-block:56px 88px}
+.hero h1{font-size:clamp(2.6rem,6.6vw,5rem);line-height:.98;font-weight:800}
+.hero h1 em{font-style:normal;color:var(--mint)}
+.hero .lead{color:#B8D4C6;margin-top:22px}
+.ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:14px;font:600 1rem var(--body);text-decoration:none;border:1.5px solid transparent;transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn.go{background:#22C55E;color:#062616}
+.btn.ghost{border-color:#3C6B58;color:var(--pine-ink)}
+.facts{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:36px;font:500 .82rem var(--mono);color:#8FB5A3}
+.hero-text{min-width:0}
+
+/* demo del semáforo */
+.demo{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start;min-width:0}
+.poste{display:grid;gap:12px;padding:16px 14px;background:#071F17;border-radius:40px;box-shadow:inset 0 0 0 2px #1B4535,0 30px 60px -20px #000a}
+.luz{width:58px;height:58px;border-radius:50%;border:0;cursor:pointer;background:#16302A;transition:background .25s,box-shadow .25s;position:relative}
+.luz::after{content:"";position:absolute;inset:8px 18px auto 12px;height:10px;border-radius:50%;background:#ffffff14}
+.luz[data-s="rojo"][aria-pressed="true"]{background:#EF4444;box-shadow:0 0 34px #EF4444aa}
+.luz[data-s="amarillo"][aria-pressed="true"]{background:#F59E0B;box-shadow:0 0 34px #F59E0Baa}
+.luz[data-s="verde"][aria-pressed="true"]{background:#22C55E;box-shadow:0 0 34px #22C55Eaa}
+.ficha{background:var(--surface);color:var(--ink);border-radius:22px;padding:22px;min-width:0;box-shadow:0 30px 60px -24px #000c}
+.ficha .tag{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:99px;font:600 .82rem var(--body)}
+.ficha .tag::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.ficha[data-s="verde"] .tag{background:var(--go-soft);color:var(--go)}
+.ficha[data-s="amarillo"] .tag{background:var(--wait-soft);color:var(--wait)}
+.ficha[data-s="rojo"] .tag{background:var(--stop-soft);color:var(--stop)}
+.ficha h3{margin-top:12px;font-size:1.25rem}
+.ficha .emp{color:var(--muted);font-size:.95rem}
+.ficha dl{margin:16px 0 0;display:grid;gap:10px}
+.ficha dt{font:500 .72rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.ficha dd{margin:2px 0 0;font-size:.95rem;line-height:1.45}
+.ficha .accion{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-weight:600}
+.ejemplo{grid-column:1/-1;font:500 .75rem var(--mono);color:#8FB5A3}
+
+/* cómo funciona */
+.pasos{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;counter-reset:p}
+.paso{display:grid;gap:10px;align-content:start;padding-top:20px;border-top:2px solid var(--ink)}
+.paso .n{font:500 .8rem var(--mono);color:var(--muted)}
+.paso p{color:var(--muted)}
+
+/* garantía cv */
+.garantia{background:var(--surface);border-block:1px solid var(--line)}
+.garantia .wrap{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.reglas{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.reglas li{display:grid;grid-template-columns:28px 1fr;gap:12px;padding-block:16px;border-bottom:1px solid var(--line)}
+.reglas li:first-child{border-top:1px solid var(--line)}
+.reglas svg{width:22px;height:22px;margin-top:3px;color:var(--go)}
+.tachado{font:500 .95rem/1.7 var(--mono);background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:20px 22px;overflow-x:auto}
+.tachado .ok{color:var(--ink)}
+.tachado del{color:var(--stop);text-decoration-thickness:2px}
+.tachado .nota{display:block;margin-top:10px;color:var(--muted);font-size:.82rem}
+
+/* pantallas */
+.pantallas{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.pantalla{margin:0;display:grid;gap:12px;min-width:0}
+.marco{border-radius:30px;padding:8px;background:var(--ink);box-shadow:0 20px 40px -24px #0008}
+.marco img{display:block;width:100%;height:auto;aspect-ratio:585/1266;border-radius:23px;background:var(--line)}
+.pantalla figcaption{font-size:.95rem;color:var(--muted)}
+.pantalla figcaption b{display:block;color:var(--ink);font-family:var(--display);font-size:1.05rem}
+@media (max-width:900px){.pantallas{grid-template-columns:repeat(2,1fr)}}
+
+/* técnica */
+.cifras{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:48px}
+.cifra{display:grid;gap:4px}
+.cifra b{font:800 clamp(2.2rem,4.6vw,3.2rem)/1 var(--display);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.cifra span{color:var(--muted);font-size:.95rem}
+.stack{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.capa{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px;display:grid;gap:12px;align-content:start;min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips span{font:500 .8rem var(--mono);padding:6px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--line)}
+.capa p{color:var(--muted);font-size:.97rem}
+
+/* hoja de ruta */
+.ruta{display:grid;grid-template-columns:repeat(6,1fr);gap:0;list-style:none;margin:0;padding:0}
+.ruta li{display:grid;gap:8px;align-content:start;padding:18px 16px 0 0;border-top:4px solid var(--go);position:relative}
+.ruta li::before{content:"";position:absolute;top:-10px;left:0;width:16px;height:16px;border-radius:50%;background:var(--go);border:3px solid var(--bg)}
+.ruta li.pend{border-top-color:var(--line)}
+.ruta li.pend::before{background:var(--bg);border-color:var(--wait)}
+.ruta .f{font:500 .75rem var(--mono);color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.ruta b{font-family:var(--display);font-size:1.05rem;line-height:1.2}
+.ruta p{font-size:.9rem;color:var(--muted)}
+
+/* pie */
+.pie{background:var(--pine);color:var(--pine-ink)}
+.pie .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:28px;padding-block:64px}
+.pie h2{color:var(--pine-ink);max-width:16ch}
+.pie small{display:block;margin-top:18px;color:#8FB5A3;font:500 .8rem var(--mono)}
+
+@media (max-width:900px){
+  .hero .wrap,.garantia .wrap{grid-template-columns:1fr}
+  .cifras{grid-template-columns:repeat(2,1fr)}
+  .ruta{grid-template-columns:repeat(2,1fr);row-gap:28px}
+}
+@media (max-width:640px){
+  .pasos,.stack{grid-template-columns:1fr}
+  .luz{width:46px;height:46px}
+  .poste{gap:10px;padding:12px 10px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#inicio"><span class="mini" aria-hidden="true"><i></i><i></i><i></i></span>Luz Verde</a>
+    <nav aria-label="Secciones">
+      <a href="#como">Cómo funciona</a>
+      <a href="#pantallas">Pantallas</a>
+      <a href="#tecnica">Técnica</a>
+      <a class="gh" href="https://github.com/albertocll/luz-verde">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="inicio">
+  <section class="hero" aria-labelledby="titulo">
+    <div class="wrap">
+      <div class="hero-text">
+        <p class="eyebrow" style="color:#8FB5A3">Asesor de empleo para Android</p>
+        <h1 id="titulo" style="margin-top:18px">Pega la oferta. Te digo si es <em>luz verde</em>.</h1>
+        <p class="lead">Luz Verde compara cada oferta con tu perfil real y te da un semáforo con lo que tienes a favor, lo que te falta y las banderas rojas. Si te presentas, te prepara un CV y una carta para esa oferta sin inventar nada.</p>
+        <div class="ctas">
+          <a class="btn go" href="https://github.com/albertocll/luz-verde">Ver el código</a>
+          <a class="btn ghost" href="#pantallas">Ver la app</a>
+        </div>
+        <p class="facts"><span>Java 21 · Spring Boot 3.5</span><span>Expo SDK 58</span><span>49 tests · 94 % cobertura</span></p>
+      </div>
+
+      <div class="demo">
+        <div class="poste" role="group" aria-label="Elige un color del semáforo">
+          <button class="luz" data-s="rojo" aria-pressed="false" aria-label="Rojo"></button>
+          <button class="luz" data-s="amarillo" aria-pressed="false" aria-label="Amarillo"></button>
+          <button class="luz" data-s="verde" aria-pressed="true" aria-label="Verde"></button>
+        </div>
+        <article class="ficha" data-s="verde" aria-live="polite">
+          <span class="tag" id="f-tag">Verde · Preséntate</span>
+          <h3 id="f-puesto">Desarrollador Java junior</h3>
+          <p class="emp" id="f-emp">Norte Digital · híbrido · 26.000 €</p>
+          <dl>
+            <div><dt>A favor</dt><dd id="f-pro">Java 21 y Spring Boot con nivel sólido. Salario por encima de tu mínimo.</dd></div>
+            <div><dt>Te falta</dt><dd id="f-hueco">Kafka, que la oferta pone como deseable.</dd></div>
+          </dl>
+          <p class="accion" id="f-accion">Envíala esta semana y cita el proyecto de Spring Boot de tu perfil.</p>
+        </article>
+        <p class="ejemplo">Ejemplo con datos de la demo. Toca las luces.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="como" aria-labelledby="como-t">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Cómo funciona</p>
+        <h2 id="como-t">Tres pasos entre la oferta y el envío</h2>
+      </div>
+      <div class="pasos">
+        <div class="paso"><span class="n">Paso 1</span><h3>Rellenas tu perfil una vez</h3><p>Stack con nivel (sólido, medio o sin tocar), experiencia, proyectos, formación, idiomas, salario mínimo y modalidad.</p></div>
+        <div class="paso"><span class="n">Paso 2</span><h3>Pegas una oferta</h3><p>Claude la lee contra tu perfil y responde siempre con la misma forma: semáforo, pros, huecos, banderas rojas y qué hacer.</p></div>
+        <div class="paso"><span class="n">Paso 3</span><h3>Generas el CV</h3><p>PDF y Word de una columna, pensados para pasar filtros ATS, más una carta de 150 palabras como máximo. La candidatura queda guardada.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="garantia" aria-labelledby="gar-t">
+    <div class="wrap">
+      <div style="display:grid;gap:18px;min-width:0">
+        <p class="eyebrow">La regla dura</p>
+        <h2 id="gar-t">El CV no inventa nada</h2>
+        <p class="lead">No basta con pedírselo al modelo. Hay una capa en el servidor que revisa cada frase antes de que llegue al PDF.</p>
+        <div class="tachado" aria-label="Ejemplo de frase eliminada">
+          <span class="ok">Desarrollé una API REST con Spring Boot y PostgreSQL.</span><br>
+          <del>Desplegué los servicios en Kubernetes.</del>
+          <span class="nota">Kubernetes lo pide la oferta y no está en tu perfil. La frase sale del CV y la tecnología pasa a la lista de huecos.</span>
+        </div>
+      </div>
+      <ul class="reglas">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><p>Puestos, empresas, fechas, títulos y centros salen siempre de tu perfil. El modelo solo ordena y reformula.</p></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><p>En el CV solo aparecen tecnologías con nivel sólido o medio. Si el modelo propone otra, se descarta.</p></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><p>Las experiencias que el modelo no use se añaden igualmente con tu texto original.</p></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><p>La clave de Anthropic vive solo en el servidor. La app nunca la ve, y cada usuario tiene 10 usos de IA al día.</p></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="pantallas" aria-labelledby="pan-t">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">La app</p>
+        <h2 id="pan-t">Cuatro pestañas, nada más</h2>
+      </div>
+      <div class="pantallas">
+        <figure class="pantalla"><div class="marco"><img src="img/candidaturas.webp" alt="Pantalla Candidaturas: lista con estados Entrevista, Esperando respuesta, Enviada y Pendiente" width="585" height="1266" loading="lazy"></div><figcaption><b>Candidaturas</b>Filtro por estado y resumen de activas, entrevistas y esperas.</figcaption></figure>
+        <figure class="pantalla"><div class="marco"><img src="img/evaluar.webp" alt="Pantalla Evaluar: campo para pegar la oferta y evaluaciones recientes con semáforo" width="585" height="1266" loading="lazy"></div><figcaption><b>Evaluar</b>Pegas la oferta y ves el semáforo. Desde ahí, guardar o generar CV.</figcaption></figure>
+        <figure class="pantalla"><div class="marco"><img src="img/cv.webp" alt="Pantalla CV: CV generados con descarga en PDF y Word" width="585" height="1266" loading="lazy"></div><figcaption><b>CV</b>Descarga en PDF o Word, con la carta y los huecos detectados.</figcaption></figure>
+        <figure class="pantalla"><div class="marco"><img src="img/perfil.webp" alt="Pantalla Perfil: datos de contacto, stack con niveles y experiencia" width="585" height="1266" loading="lazy"></div><figcaption><b>Perfil</b>Tu stack con niveles, experiencia, proyectos e idiomas.</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="tecnica" class="garantia" aria-labelledby="tec-t">
+    <div class="wrap" style="display:block">
+      <div class="sec-head">
+        <p class="eyebrow">Por dentro</p>
+        <h2 id="tec-t">Un monorepo con backend y app</h2>
+      </div>
+      <div class="cifras">
+        <div class="cifra"><b>49</b><span>tests del backend en verde</span></div>
+        <div class="cifra"><b>94 %</b><span>cobertura de líneas (JaCoCo)</span></div>
+        <div class="cifra"><b>22</b><span>tests de la app con Jest</span></div>
+        <div class="cifra"><b>16</b><span>endpoints REST documentados en Swagger</span></div>
+      </div>
+      <div class="stack">
+        <div class="capa">
+          <h3>Backend</h3>
+          <div class="chips"><span>Java 21</span><span>Spring Boot 3.5</span><span>Spring Security + JWT</span><span>PostgreSQL</span><span>OpenPDF</span><span>Apache POI</span></div>
+          <p>Evaluación con claude-haiku-5-5 y herramienta forzada con esquema JSON fijo. Límite de intentos de login, cabeceras de seguridad y Docker Compose para arrancar en local.</p>
+        </div>
+        <div class="capa">
+          <h3>App</h3>
+          <div class="chips"><span>React Native</span><span>Expo SDK 58</span><span>Expo Router</span><span>TypeScript</span><span>SecureStore</span></div>
+          <p>Token guardado en el almacén seguro del sistema, aviso de perfil incompleto y etiquetas de accesibilidad en cada control.</p>
+        </div>
+        <div class="capa">
+          <h3>Calidad</h3>
+          <div class="chips"><span>GitHub Actions</span><span>CodeQL</span><span>gitleaks</span><span>Dependabot</span></div>
+          <p>La CI ejecuta los tests en cada push y exige un mínimo de cobertura. Los tests simulan la API de Claude y no gastan créditos.</p>
+        </div>
+        <div class="capa">
+          <h3>Documentación</h3>
+          <div class="chips"><span>arquitectura</span><span>decisiones</span><span>seguridad</span><span>ux</span><span>privacidad</span></div>
+          <p>Cada decisión técnica está escrita con su motivo, y cada medida de seguridad enlaza con el test que la comprueba.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="ruta-t">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Hoja de ruta</p>
+        <h2 id="ruta-t">Cuatro fases hechas, dos por delante</h2>
+      </div>
+      <ol class="ruta">
+        <li><span class="f">Fase 1</span><b>Base</b><p>Auth JWT, candidaturas, perfil, Swagger.</p></li>
+        <li><span class="f">Fase 2</span><b>Evaluador</b><p>Semáforo con Claude y límite de uso.</p></li>
+        <li><span class="f">Fase 3</span><b>CV y carta</b><p>PDF y DOCX para ATS sin inventar.</p></li>
+        <li><span class="f">Fase 4</span><b>App Expo</b><p>Cuatro pestañas y 22 tests.</p></li>
+        <li class="pend"><span class="f">Fase 5</span><b>Railway</b><p>Backend desplegado en la nube.</p></li>
+        <li class="pend"><span class="f">Fase 6</span><b>Google Play</b><p>Publicación en la tienda.</p></li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer class="pie">
+  <div class="wrap">
+    <div>
+      <h2>¿Quieres ver cómo está hecho?</h2>
+      <small>Proyecto de portfolio de Alberto · 2026</small>
+    </div>
+    <div class="ctas" style="margin-top:0">
+      <a class="btn go" href="https://github.com/albertocll/luz-verde">Repositorio en GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var datos={
+    verde:{tag:"Verde · Preséntate",puesto:"Desarrollador Java junior",emp:"Norte Digital · híbrido · 26.000 €",pro:"Java 21 y Spring Boot con nivel sólido. Salario por encima de tu mínimo.",hueco:"Kafka, que la oferta pone como deseable.",accion:"Envíala esta semana y cita el proyecto de Spring Boot de tu perfil."},
+    amarillo:{tag:"Amarillo · Pregunta antes",puesto:"Programador full stack",emp:"Logística Ébano · presencial · salario sin publicar",pro:"React Native y TypeScript, que usas en tus proyectos.",hueco:"Angular y tres años de experiencia en producción.",accion:"Pide el rango salarial antes de dedicarle una tarde al CV."},
+    rojo:{tag:"Rojo · Déjala pasar",puesto:"Analista programador COBOL",emp:"Seguros Altamar · presencial 5 días",pro:"Conoces SQL y el sector seguros por tus prácticas.",hueco:"COBOL, CICS y mainframe. Modalidad fuera de lo que buscas.",accion:"Descártala y guarda el tiempo para ofertas en verde."}
+  };
+  var luces=document.querySelectorAll(".luz"),ficha=document.querySelector(".ficha");
+  function pon(s){
+    var d=datos[s];ficha.dataset.s=s;
+    luces.forEach(function(l){l.setAttribute("aria-pressed",l.dataset.s===s?"true":"false")});
+    ["tag","puesto","emp","pro","hueco","accion"].forEach(function(k){document.getElementById("f-"+k).textContent=d[k]});
+  }
+  luces.forEach(function(l){l.addEventListener("click",function(){pon(l.dataset.s)})});
+})();
+</script>
+
+</body>
+</html>
