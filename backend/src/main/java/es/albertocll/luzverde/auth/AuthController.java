@@ -6,6 +6,7 @@ import es.albertocll.luzverde.auth.AuthDtos.TokenResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,7 +36,7 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "Inicia sesión y devuelve un token")
-    public TokenResponse login(@Valid @RequestBody LoginRequest peticion) {
-        return authService.login(peticion);
+    public TokenResponse login(@Valid @RequestBody LoginRequest peticion, HttpServletRequest request) {
+        return authService.login(peticion, request.getRemoteAddr());
     }
 }

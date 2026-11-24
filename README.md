@@ -1,5 +1,8 @@
 # Luz Verde
 
+[![CI](https://github.com/albertocll/luz-verde/actions/workflows/ci.yml/badge.svg)](https://github.com/albertocll/luz-verde/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/albertocll/luz-verde/actions/workflows/codeql.yml/badge.svg)](https://github.com/albertocll/luz-verde/actions/workflows/codeql.yml)
+
 Asesor de empleo para Android. Guarda tus candidaturas, tu perfil profesional y, en próximas fases, evalúa ofertas y genera CV adaptados a cada una.
 
 Proyecto de portfolio de Alberto (github.com/albertocll).
@@ -9,14 +12,26 @@ Proyecto de portfolio de Alberto (github.com/albertocll).
 - Backend: Java 21, Spring Boot 3.5, Spring Data JPA, Spring Security con JWT, PostgreSQL.
 - Documentación de la API: OpenAPI con Swagger UI (springdoc).
 - Tests: JUnit 5 y MockMvc sobre H2 en memoria.
-- App móvil (fase 4): React Native con Expo y TypeScript.
+- App móvil: React Native con Expo SDK 58, Expo Router y TypeScript.
+
+## documentación
+
+- [Hoja de ruta](docs/hoja-de-ruta.md): lo que falta, por fases.
+- [Arquitectura](docs/arquitectura.md): piezas, modelo de datos, flujos y pruebas.
+- [Decisiones](docs/decisiones.md): qué se eligió y por qué.
+- [Seguridad](docs/seguridad.md): riesgos, medidas y la prueba que cubre cada una.
+- [Interfaz](docs/ux.md): principios, pantallas, onboarding y accesibilidad.
+- [Política de privacidad](docs/privacidad.md): borrador para Google Play.
+- [Cómo contribuir](CONTRIBUTING.md), [cambios](CHANGELOG.md) y [cómo informar de un fallo de seguridad](SECURITY.md).
 
 ## estructura
 
 ```
 luz-verde/
 ├── backend/            API REST en Spring Boot
-├── mobile/             App React Native (pendiente)
+├── mobile/             App React Native (Expo)
+├── docs/               Arquitectura, decisiones, seguridad, interfaz y privacidad
+├── .github/            CI, CodeQL, Dependabot y plantillas de issues
 ├── docker-compose.yml  PostgreSQL y backend para desarrollo local
 └── .env.example        Variables de entorno de ejemplo
 ```
@@ -43,14 +58,44 @@ Necesitas Docker y, si vas a ejecutar el backend fuera de Docker, Java 21 y Mave
    En este segundo caso el backend necesita las variables `DB_PASSWORD` y `JWT_SECRET` en el entorno (en IntelliJ, en la configuración de ejecución).
 3. La API queda en `http://localhost:8080` y la documentación en `http://localhost:8080/swagger-ui.html`.
 
+## app móvil
+
+La app está en `mobile/` y usa Expo SDK 58, Expo Router y TypeScript. Tiene cuatro pestañas:
+
+- Candidaturas: lista con filtro por estado, resumen de activas, entrevistas y esperando respuesta, y alta, edición y borrado.
+- Evaluar: pegas una oferta y ves el semáforo, lo que tienes a favor, lo que te falta, las banderas rojas y qué hacer. Desde ahí la guardas como candidatura o generas el CV.
+- CV: generas un CV para una oferta y descargas el PDF o el Word, con la carta y los huecos.
+- Perfil: datos de contacto, salario y modalidad, stack con niveles, experiencia, proyectos, formación e idiomas. Aquí también cambias la URL del backend y cierras sesión.
+
+El token se guarda con `expo-secure-store`. La URL del backend se cambia desde la app o con `EXPO_PUBLIC_API_URL`. En el emulador de Android, `http://10.0.2.2:8080` apunta al backend de tu ordenador.
+
+### probarla en el emulador de Android Studio
+
+1. Arranca el backend con `docker compose up --build` desde la raíz.
+2. Abre un emulador desde el Device Manager de Android Studio.
+3. En otra terminal:
+
+   ```
+   cd mobile
+   npm install
+   npx expo start --android
+   ```
+
+   Expo instala Expo Go en el emulador y abre la app.
+
 ## tests
 
 ```
 cd backend
 mvn test
+
+cd ../mobile
+npm run typecheck
 ```
 
-Los tests usan H2 en memoria, así que no necesitan Docker ni PostgreSQL.
+Los tests del backend usan H2 en memoria y simulan la API de Claude, así que no necesitan Docker, PostgreSQL ni créditos. `mvn verify` además exige un 70 % de cobertura de líneas y deja el informe en `backend/target/site/jacoco/index.html`.
+
+La CI de GitHub Actions ejecuta todo en cada push, busca secretos con gitleaks y analiza el código con CodeQL. Dependabot propone actualizaciones de dependencias cada semana.
 
 ## api
 
@@ -122,6 +167,8 @@ Cada usuario solo ve y modifica sus datos. Si pides una candidatura de otro usua
 | `ANTHROPIC_MAX_TOKENS` | No | Tope de tokens de salida por llamada. Por defecto 2048 |
 | `LIMITE_IA_DIARIO` | No | Usos de IA por usuario y día. Por defecto 10 |
 
+El login se bloquea 15 minutos tras 5 fallos con el mismo email o 20 desde la misma IP. `/actuator/health` es público para que la plataforma de despliegue compruebe que el servidor está vivo.
+
 Ningún secreto vive en el repositorio.
 
 ## fases
@@ -129,6 +176,6 @@ Ningún secreto vive en el repositorio.
 - [x] Fase 1. Backend base: registro y login, candidaturas, perfil, tests y Swagger.
 - [x] Fase 2. Evaluador de ofertas con la API de Claude.
 - [x] Fase 3. Generador de CV compatible con ATS.
-- [ ] Fase 4. App React Native.
+- [x] Fase 4. App React Native.
 - [ ] Fase 5. Despliegue en Railway.
 - [ ] Fase 6. Publicación en Google Play.

@@ -13,18 +13,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Locale;
+import java.util.UUID;
 
 @Service
 public class AuthService {
 
+
     private final UsuarioRepository usuarios;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final LimiteLoginService limiteLogin;
+    /** Hash de una contraseña aleatoria que nadie conoce, para igualar tiempos. */
+    private final String hashFalso;
 
-    public AuthService(UsuarioRepository usuarios, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthService(UsuarioRepository usuarios, PasswordEncoder passwordEncoder, JwtService jwtService,
+                       LimiteLoginService limiteLogin) {
         this.usuarios = usuarios;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.limiteLogin = limiteLogin;
+        this.hashFalso = passwordEncoder.encode(UUID.randomUUID().toString());
     }
 
     @Transactional
@@ -41,12 +49,18 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public TokenResponse login(LoginRequest peticion) {
-        Usuario usuario = usuarios.findByEmailIgnoreCase(normalizar(peticion.email()))
-                .orElseThrow(CredencialesInvalidasException::new);
-        if (!passwordEncoder.matches(peticion.password(), usuario.getPasswordHash())) {
+    public TokenResponse login(LoginRequest peticion, String ip) {
+        String email = normalizar(peticion.email());
+        limiteLogin.comprobar(email, ip);
+        Usuario usuario = usuarios.findByEmailIgnoreCase(email).orElse(null);
+        // Se compara la contraseña aunque el usuario no exista, para no revelar por tiempos qué emails hay.
+        String hash = usuario != null ? usuario.getPasswordHash() : hashFalso;
+        boolean correcta = passwordEncoder.matches(peticion.password(), hash);
+        if (usuario == null || !correcta) {
+            limiteLogin.registrarFallo(email, ip);
             throw new CredencialesInvalidasException();
         }
+        limiteLogin.registrarExito(email);
         return token(usuario);
     }
 
