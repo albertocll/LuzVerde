@@ -85,6 +85,10 @@ El generador de CV sigue el mismo camino. Después pasa la salida del modelo por
 | `src/tema.ts` | Colores, espaciados y nombres de estados y semáforos |
 | `tests/` | Tests con Jest y Testing Library |
 
+### modo demo
+
+`npm run web:demo` arranca la app en el navegador con `react-native-web`. La API real se sustituye por `src/demo/apiDemo.ts`, que trabaja en memoria con los datos de `src/demo/datos.ts`, y `src/almacen.ts` guarda la sesión en memoria porque SecureStore no existe en la web. Solo se activa con `EXPO_PUBLIC_DEMO=1` y no entra en la build normal.
+
 ## pruebas
 
 | Dónde | Qué | Cómo |

@@ -55,3 +55,15 @@ Cinco fallos por email o veinte por IP en 15 minutos bloquean el login durante e
 Fecha: 2026-11-23
 
 La app solo usa módulos incluidos en Expo Go (Expo Router, SecureStore, FileSystem, Sharing), así que se prueba sin compilar nada nativo. Para Google Play se generará el AAB con EAS Build.
+
+## 10. modo demo web que no entra en producción
+
+Fecha: 2026-11-24
+
+Para enseñar la app sin backend ni móvil, `npm run web:demo` la abre en el navegador con una API falsa en memoria y datos inventados. El código vive en `mobile/src/demo/` y solo se carga con `EXPO_PUBLIC_DEMO=1`. Babel sustituye esa variable al construir y Metro elimina el `require` en la build normal, así que el modo demo no llega a la app de Google Play. Se comprobó buscando los datos demo en la exportación normal.
+
+## 11. commits con Conventional Commits
+
+Fecha: 2026-11-24
+
+Los mensajes siguen [Conventional Commits](https://www.conventionalcommits.org/es/v1.0.0/) en español (`feat(mobile): ...`, `fix(seguridad): ...`, `docs: ...`). Así el historial se lee por área y el CHANGELOG se escribe casi solo.

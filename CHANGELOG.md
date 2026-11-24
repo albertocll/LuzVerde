@@ -6,6 +6,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ### añadido
 
+- Vista previa web de la app y modo demo con datos inventados (`npm run web:demo`), fuera de la build de producción.
+- README con mockup, capturas y diagrama de arquitectura.
+
 - Límite de intentos de login: 5 fallos por email o 20 por IP en 15 minutos.
 - Endpoint `/actuator/health` para el despliegue.
 - Cabeceras de seguridad y manejador de errores que nunca devuelve trazas.
@@ -16,6 +19,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 - Mejoras de accesibilidad: roles, estados y etiquetas en botones, chips, campos y semáforo.
 - CI en GitHub Actions, CodeQL, búsqueda de secretos con gitleaks y Dependabot.
 - Documentación: arquitectura, decisiones, seguridad, interfaz y borrador de política de privacidad.
+
+### seguridad
+
+- El límite de login borra las claves caducadas para que probar miles de emails no llene la memoria.
+- El login rechaza emails y contraseñas más largos de lo que admite el registro.
+- `X-Forwarded-For` se ignora salvo que se active `FORWARD_HEADERS_STRATEGY=native` detrás de un proxy.
+- Docker Compose publica PostgreSQL solo en `127.0.0.1`.
 
 ## [0.4.0] - 2026-11-24
 
