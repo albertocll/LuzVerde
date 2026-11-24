@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import es.albertocll.luzverde.usuario.UsuarioRepository;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,9 +22,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private static final String PREFIJO = "Bearer ";
 
     private final JwtService jwtService;
+    private final UsuarioRepository usuarios;
 
-    public JwtAuthFilter(JwtService jwtService) {
+    public JwtAuthFilter(JwtService jwtService, UsuarioRepository usuarios) {
         this.jwtService = jwtService;
+        this.usuarios = usuarios;
     }
 
     @Override
@@ -34,7 +37,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (cabecera != null && cabecera.startsWith(PREFIJO)
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
             String token = cabecera.substring(PREFIJO.length());
-            jwtService.validar(token).ifPresent(usuario -> {
+            // Un token de una cuenta ya borrada sigue siendo válido hasta que caduca: se rechaza.
+            jwtService.validar(token).filter(usuario -> usuarios.existsById(usuario.id())).ifPresent(usuario -> {
                 var autenticacion = new UsernamePasswordAuthenticationToken(usuario, null, List.of());
                 SecurityContextHolder.getContext().setAuthentication(autenticacion);
             });

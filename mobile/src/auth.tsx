@@ -11,6 +11,7 @@ interface ContextoAuth {
   entrar: (email: string, password: string) => Promise<void>;
   registrarse: (nombre: string, email: string, password: string) => Promise<void>;
   salir: () => Promise<void>;
+  borrarCuenta: () => Promise<void>;
 }
 
 const Contexto = createContext<ContextoAuth | null>(null);
@@ -57,6 +58,10 @@ export function ProveedorAuth({ children }: { children: ReactNode }) {
       entrar: async (email, password) => guardar(await api.login(email, password)),
       registrarse: async (nombre, email, password) => guardar(await api.registro(nombre, email, password)),
       salir: () => guardar(null),
+      borrarCuenta: async () => {
+        await api.borrarCuenta();
+        await guardar(null);
+      },
     }),
     [sesion, cargando, guardar],
   );

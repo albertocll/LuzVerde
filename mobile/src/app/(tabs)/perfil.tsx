@@ -39,7 +39,7 @@ const VACIO: Perfil = {
 };
 
 export default function PantallaPerfil() {
-  const { sesion, salir } = useAuth();
+  const { sesion, salir, borrarCuenta } = useAuth();
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [salario, setSalario] = useState('');
   const [nuevaTec, setNuevaTec] = useState('');
@@ -168,6 +168,26 @@ export default function PantallaPerfil() {
     setUrl(nueva);
     Alert.alert('Servidor guardado', nueva);
   };
+
+  const confirmarBorrado = () =>
+    Alert.alert(
+      'Borrar cuenta',
+      'Se borrarán tu cuenta, tu perfil, tus candidaturas, tus evaluaciones y tus CV. No se puede deshacer.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Borrar todo',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await borrarCuenta();
+            } catch (e) {
+              setError(e instanceof ErrorApi ? e.message : 'No se ha podido borrar la cuenta.');
+            }
+          },
+        },
+      ],
+    );
 
   const cerrarSesion = () =>
     Alert.alert('Cerrar sesión', '¿Quieres salir de tu cuenta?', [
@@ -370,6 +390,13 @@ export default function PantallaPerfil() {
       </Seccion>
 
       <Boton titulo="Cerrar sesión" icono="log-out-outline" variante="peligro" alPulsar={cerrarSesion} estilo={{ marginTop: espacio.xl }} />
+      <Boton
+        titulo="Borrar cuenta y datos"
+        icono="trash-outline"
+        variante="texto"
+        alPulsar={confirmarBorrado}
+        estilo={{ marginTop: espacio.m }}
+      />
     </Pantalla>
   );
 }

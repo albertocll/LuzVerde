@@ -46,6 +46,14 @@ export const apiDemo: typeof apiReal = {
     return pausa(undefined);
   },
 
+  borrarCuenta: async () => {
+    candidaturas = [];
+    evaluaciones = [];
+    cvs = [];
+    perfil = structuredClone(perfilDemo);
+    return pausa(undefined);
+  },
+
   perfil: async () => pausa(perfil),
   guardarPerfil: async (nuevo) => {
     perfil = nuevo;

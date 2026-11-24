@@ -116,6 +116,9 @@ const apiServidor = {
     peticion<Candidatura>(`/candidaturas/${id}`, { method: 'PUT', body: json(datos) }),
   borrarCandidatura: (id: number) => peticion<void>(`/candidaturas/${id}`, { method: 'DELETE' }),
 
+  /** Borra la cuenta y todos sus datos en el servidor. No se puede deshacer. */
+  borrarCuenta: () => peticion<void>('/cuenta', { method: 'DELETE' }),
+
   perfil: () => peticion<Perfil>('/perfil'),
   guardarPerfil: (perfil: Perfil) => peticion<Perfil>('/perfil', { method: 'PUT', body: json(perfil) }),
 
