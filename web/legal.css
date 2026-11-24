@@ -1,0 +1,29 @@
+/* Estilo común de las páginas legales. Mismos colores que index.html. */
+:root{
+  --bg:#F4F7F5; --surface:#FFFFFF; --ink:#0E1B16; --muted:#5B6B64; --line:#DDE6E1;
+  --pine:#0F3D2E; --pine-ink:#E9F5EE; --go:#16A34A; --stop:#DC2626;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Instrument Sans", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B1612; --surface:#12211B; --ink:#E7EFEA; --muted:#9AAEA5; --line:#22362D;
+  --go:#22C55E; --stop:#EF4444; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B1612; --surface:#12211B; --ink:#E7EFEA; --muted:#9AAEA5; --line:#22362D;
+  --go:#22C55E; --stop:#EF4444; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.65 var(--body);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--go);outline-offset:3px;border-radius:6px}
+.top{background:var(--pine);color:var(--pine-ink)}
+.top a{display:inline-block;padding:16px max(16px,env(safe-area-inset-left,0px));font:800 1.1rem var(--display);text-decoration:none}
+main{max-width:720px;margin:0 auto;padding:40px 16px 72px}
+h1,h2{font-family:var(--display);letter-spacing:-.02em;line-height:1.15}
+h1{font-size:clamp(2rem,6vw,2.6rem);margin:0 0 8px}
+h2{font-size:1.3rem;margin:36px 0 8px}
+.fecha{color:var(--muted);font-size:.95rem;margin:0 0 24px}
+.caja{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:20px 0}
+ol,ul{padding-left:1.3em}
+li{margin:6px 0}
+footer{border-top:1px solid var(--line);color:var(--muted);font-size:.9rem;padding:20px 16px;text-align:center}
+footer a{margin:0 8px}
