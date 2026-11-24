@@ -12,4 +12,6 @@ public interface CandidaturaRepository extends JpaRepository<Candidatura, Long> 
     List<Candidatura> findByUsuarioIdAndEstadoOrderByFechaDescIdDesc(Long usuarioId, EstadoCandidatura estado);
 
     Optional<Candidatura> findByIdAndUsuarioId(Long id, Long usuarioId);
+
+    void deleteByUsuarioId(Long usuarioId);
 }

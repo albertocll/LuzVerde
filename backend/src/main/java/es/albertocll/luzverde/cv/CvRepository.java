@@ -10,4 +10,6 @@ public interface CvRepository extends JpaRepository<Cv, Long> {
     List<Cv> findTop50ByUsuarioIdOrderByCreadoEnDesc(Long usuarioId);
 
     Optional<Cv> findByIdAndUsuarioId(Long id, Long usuarioId);
+
+    void deleteByUsuarioId(Long usuarioId);
 }

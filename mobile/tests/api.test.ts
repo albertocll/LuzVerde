@@ -101,4 +101,15 @@ describe('api', () => {
 
     await expect(api.borrarCandidatura(1)).resolves.toBeUndefined();
   });
+  it('borra la cuenta con DELETE /cuenta y el token', async () => {
+    fijarToken('mi-token');
+    fetchSimulado.mockResolvedValue(respuesta(204));
+
+    await expect(api.borrarCuenta()).resolves.toBeUndefined();
+
+    const [url, opciones] = fetchSimulado.mock.calls[0];
+    expect(url).toBe('http://servidor.test/cuenta');
+    expect(opciones.method).toBe('DELETE');
+    expect(opciones.headers.Authorization).toBe('Bearer mi-token');
+  });
 });

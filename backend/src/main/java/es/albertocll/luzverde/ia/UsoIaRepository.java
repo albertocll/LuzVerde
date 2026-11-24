@@ -7,4 +7,6 @@ import java.time.Instant;
 public interface UsoIaRepository extends JpaRepository<UsoIa, Long> {
 
     long countByUsuarioIdAndCreadoEnGreaterThanEqual(Long usuarioId, Instant desde);
+
+    void deleteByUsuarioId(Long usuarioId);
 }
