@@ -1,4 +1,4 @@
-import * as SecureStore from 'expo-secure-store';
+import { almacen } from './almacen';
 import { Platform } from 'react-native';
 
 const CLAVE_URL = 'luzverde.urlServidor';
@@ -15,7 +15,7 @@ let urlActual: string | null = null;
 
 export async function cargarUrlServidor(): Promise<string> {
   if (urlActual) return urlActual;
-  const guardada = await SecureStore.getItemAsync(CLAVE_URL);
+  const guardada = await almacen.leer(CLAVE_URL);
   const url = guardada || URL_POR_DEFECTO;
   urlActual = url;
   return url;
@@ -23,7 +23,7 @@ export async function cargarUrlServidor(): Promise<string> {
 
 export async function guardarUrlServidor(url: string): Promise<string> {
   const limpia = normalizarUrl(url) || URL_POR_DEFECTO;
-  await SecureStore.setItemAsync(CLAVE_URL, limpia);
+  await almacen.guardar(CLAVE_URL, limpia);
   urlActual = limpia;
   return limpia;
 }

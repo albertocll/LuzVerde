@@ -72,6 +72,15 @@ export default function Login() {
         ))}
       </View>
 
+      {process.env.EXPO_PUBLIC_DEMO === '1' ? (
+        <View style={estilos.demo}>
+          <Ionicons name="flask-outline" size={16} color={color.azul} />
+          <Text style={[texto.suave, { color: color.azul, flex: 1 }]}>
+            Modo demo: los datos son inventados. Entra con cualquier email y contraseña.
+          </Text>
+        </View>
+      ) : null}
+
       <AvisoError mensaje={error} />
 
       {modo === 'registro' ? (
@@ -136,6 +145,15 @@ const estilos = StyleSheet.create({
   opcion: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: radio.s },
   opcionActiva: { backgroundColor: color.superficie },
   opcionTexto: { fontWeight: '700', color: color.textoSuave },
+  demo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: espacio.s,
+    backgroundColor: color.azulClaro,
+    borderRadius: radio.m,
+    padding: espacio.m,
+    marginBottom: espacio.l,
+  },
   servidor: {
     flexDirection: 'row',
     alignItems: 'center',

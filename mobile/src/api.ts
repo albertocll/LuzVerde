@@ -94,7 +94,7 @@ interface RespuestaToken {
   nombre: string;
 }
 
-export const api = {
+const apiServidor = {
   async login(email: string, password: string): Promise<Sesion> {
     const r = await peticion<RespuestaToken>('/auth/login', { method: 'POST', body: json({ email, password }) });
     return { token: r.token, usuarioId: r.usuarioId, nombre: r.nombre };
@@ -146,3 +146,10 @@ export const api = {
     return archivo.uri;
   },
 };
+
+/**
+ * Con EXPO_PUBLIC_DEMO=1 (solo en npm run web:demo) la app usa datos falsos en memoria.
+ * Babel sustituye la variable al construir y Metro elimina el require en la build normal.
+ */
+export const api: typeof apiServidor =
+  process.env.EXPO_PUBLIC_DEMO === '1' ? require('./demo/apiDemo').apiDemo : apiServidor;

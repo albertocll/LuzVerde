@@ -1,5 +1,5 @@
-import * as SecureStore from 'expo-secure-store';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { almacen } from './almacen';
 import { alExpirarSesion, api, fijarToken } from './api';
 import type { Sesion } from './tipos';
 
@@ -23,16 +23,16 @@ export function ProveedorAuth({ children }: { children: ReactNode }) {
     fijarToken(nueva?.token ?? null);
     setSesion(nueva);
     if (nueva) {
-      await SecureStore.setItemAsync(CLAVE_SESION, JSON.stringify(nueva));
+      await almacen.guardar(CLAVE_SESION, JSON.stringify(nueva));
     } else {
-      await SecureStore.deleteItemAsync(CLAVE_SESION);
+      await almacen.borrar(CLAVE_SESION);
     }
   }, []);
 
   useEffect(() => {
     (async () => {
       try {
-        const guardada = await SecureStore.getItemAsync(CLAVE_SESION);
+        const guardada = await almacen.leer(CLAVE_SESION);
         if (guardada) {
           const s = JSON.parse(guardada) as Sesion;
           fijarToken(s.token);
