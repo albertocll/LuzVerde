@@ -21,16 +21,16 @@ class CodigosErrorTest extends TestBase {
     @Test
     void emailRepetido() throws Exception {
         String email = emailUnico();
-        mvc.perform(post("/auth/registro").contentType(MediaType.APPLICATION_JSON).content(registro(email)))
+        mvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON).content(registro(email)))
                 .andExpect(status().isCreated());
-        mvc.perform(post("/auth/registro").contentType(MediaType.APPLICATION_JSON).content(registro(email)))
+        mvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON).content(registro(email)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("EMAIL_TAKEN"));
     }
 
     @Test
     void credencialesInvalidas() throws Exception {
-        mvc.perform(post("/auth/login")
+        mvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"email": "%s", "password": "no-es-esta"}
@@ -41,7 +41,7 @@ class CodigosErrorTest extends TestBase {
 
     @Test
     void datosNoValidos() throws Exception {
-        mvc.perform(post("/auth/registro")
+        mvc.perform(post("/api/v1/auth/registro")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"email": "no-es-un-email", "password": "x", "nombre": ""}
@@ -53,7 +53,7 @@ class CodigosErrorTest extends TestBase {
 
     @Test
     void peticionIlegible() throws Exception {
-        mvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON).content("{no es json"))
+        mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON).content("{no es json"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
     }
@@ -61,7 +61,7 @@ class CodigosErrorTest extends TestBase {
     @Test
     void recursoQueNoExiste() throws Exception {
         String token = registrar();
-        mvc.perform(get("/candidaturas/999999").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+        mvc.perform(get("/api/v1/candidaturas/999999").header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("NOT_FOUND"));
     }
@@ -69,7 +69,7 @@ class CodigosErrorTest extends TestBase {
     @Test
     void rutaQueNoExiste() throws Exception {
         String token = registrar();
-        mvc.perform(get("/no-existe").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+        mvc.perform(get("/api/v1/no-existe").header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("NOT_FOUND"));
     }
