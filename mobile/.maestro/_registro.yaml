@@ -1,0 +1,22 @@
+# Subflujo: crea una cuenta nueva con un email único y entra.
+# Lo usan los demás flujos. No se ejecuta solo (empieza por _).
+appId: es.albertocll.luzverde
+---
+- launchApp:
+    clearState: true
+- evalScript: ${output.email = 'e2e-' + Date.now() + '@ejemplo.com'}
+- tapOn: "Crear cuenta"
+- tapOn: "Nombre"
+- inputText: "Prueba E2E"
+- tapOn: "Email"
+- inputText: ${output.email}
+- tapOn: "Contraseña"
+- inputText: "contrasena-e2e"
+- hideKeyboard
+# El selector de arriba también dice "Crear cuenta": el botón es el segundo.
+- tapOn:
+    text: "Crear cuenta"
+    index: 1
+- extendedWaitUntil:
+    visible: "Aún no tienes candidaturas"
+    timeout: 15000
