@@ -16,7 +16,7 @@ export class ErrorApi extends Error {
     message: string,
     readonly estado: number,
     readonly campos: Record<string, string> = {},
-    /** Código fijo del backend, como EMAIL_TAKEN. Null si la respuesta no lo trae. */
+    /** Código fijo del backend, como INVALID_CREDENTIALS. Null si la respuesta no lo trae. */
     readonly codigo: string | null = null,
   ) {
     super(message);
@@ -39,7 +39,6 @@ export function alExpirarSesion(callback: () => void) {
  * así un cambio de redacción en el servidor no cambia lo que ve el usuario.
  */
 export const MENSAJES_POR_CODIGO: Record<string, string> = {
-  EMAIL_TAKEN: 'Ya hay una cuenta con ese email. Prueba a entrar.',
   INVALID_CREDENTIALS: 'El email o la contraseña no son correctos.',
   TOO_MANY_ATTEMPTS: 'Demasiados intentos. Espera unos minutos y vuelve a probar.',
   AI_DAILY_LIMIT: 'Has llegado al límite de usos de IA por hoy. Vuelve mañana.',
@@ -50,6 +49,10 @@ export const MENSAJES_POR_CODIGO: Record<string, string> = {
   NOT_FOUND: 'No se ha encontrado.',
   INTERNAL_ERROR: 'Ha fallado el servidor. Inténtalo de nuevo más tarde.',
 };
+
+/** Si el login tras registrarse falla, el email ya tenía cuenta con otra contraseña. No se dice cuál de las dos. */
+export const MENSAJE_REGISTRO_FALLIDO =
+  'No se ha podido crear la cuenta. Si ya tienes una con ese email, entra con tu contraseña.';
 
 /** Solo para respuestas sin code, como el 401 de un token caducado. */
 const MENSAJES: Record<number, string> = {
@@ -119,19 +122,32 @@ interface RespuestaToken {
   nombre: string;
 }
 
+async function login(email: string, password: string): Promise<Sesion> {
+  const r = await peticion<RespuestaToken>('/auth/login', { method: 'POST', body: json({ email, password }) });
+  return { token: r.token, usuarioId: r.usuarioId, nombre: r.nombre };
+}
+
 const apiServidor = {
   versionMinima: () => peticion<{ versionMinima: string }>('/version'),
 
-  async login(email: string, password: string): Promise<Sesion> {
-    const r = await peticion<RespuestaToken>('/auth/login', { method: 'POST', body: json({ email, password }) });
-    return { token: r.token, usuarioId: r.usuarioId, nombre: r.nombre };
-  },
+  login,
+  /**
+   * El backend responde igual exista o no el email, para no revelar quién tiene cuenta.
+   * Por eso el registro no trae token: se entra justo después con el login.
+   */
   async registro(nombre: string, email: string, password: string): Promise<Sesion> {
-    const r = await peticion<RespuestaToken>('/auth/registro', {
+    await peticion<{ mensaje: string }>('/auth/registro', {
       method: 'POST',
       body: json({ nombre, email, password }),
     });
-    return { token: r.token, usuarioId: r.usuarioId, nombre: r.nombre };
+    try {
+      return await login(email, password);
+    } catch (e) {
+      if (e instanceof ErrorApi && e.codigo === 'INVALID_CREDENTIALS') {
+        throw new ErrorApi(MENSAJE_REGISTRO_FALLIDO, e.estado, {}, e.codigo);
+      }
+      throw e;
+    }
   },
 
   candidaturas: (estado?: EstadoCandidatura) =>

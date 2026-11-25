@@ -34,6 +34,10 @@ public final class AuthDtos {
             String password) {
     }
 
+    /** Respuesta del registro. Es la misma exista o no el email. */
+    public record RegistroResponse(String mensaje) {
+    }
+
     public record TokenResponse(String token, String tipo, long expiraEnSegundos, Long usuarioId, String nombre) {
     }
 }

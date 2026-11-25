@@ -2,6 +2,7 @@ package es.albertocll.luzverde.auth;
 
 import es.albertocll.luzverde.auth.AuthDtos.LoginRequest;
 import es.albertocll.luzverde.auth.AuthDtos.RegistroRequest;
+import es.albertocll.luzverde.auth.AuthDtos.RegistroResponse;
 import es.albertocll.luzverde.auth.AuthDtos.TokenResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
@@ -21,6 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 @SecurityRequirements
 public class AuthController {
 
+    static final String MENSAJE_REGISTRO =
+            "Si el email no tenía cuenta, ya está creada. Entra con tu email y contraseña.";
+
     private final AuthService authService;
 
     public AuthController(AuthService authService) {
@@ -28,10 +32,12 @@ public class AuthController {
     }
 
     @PostMapping("/registro")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Crea una cuenta y devuelve un token")
-    public TokenResponse registro(@Valid @RequestBody RegistroRequest peticion) {
-        return authService.registrar(peticion);
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @Operation(summary = "Crea una cuenta si el email está libre",
+            description = "Responde lo mismo exista o no el email. Para obtener el token, llama después a /login.")
+    public RegistroResponse registro(@Valid @RequestBody RegistroRequest peticion) {
+        authService.registrar(peticion);
+        return new RegistroResponse(MENSAJE_REGISTRO);
     }
 
     @PostMapping("/login")

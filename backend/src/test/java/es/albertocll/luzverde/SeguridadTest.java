@@ -51,7 +51,7 @@ class SeguridadTest extends TestBase {
                         .content("""
                                 {"email": "%s", "password": "contrasena-buena", "nombre": "Víctima"}
                                 """.formatted(email)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isAccepted());
 
         for (int i = 0; i < 5; i++) {
             mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
@@ -71,11 +71,20 @@ class SeguridadTest extends TestBase {
 
     @Test
     void lasRespuestasNoExponenLaContrasenaNiSuHash() throws Exception {
+        String email = emailUnico();
         mvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"email": "%s", "password": "contrasena-segura", "nombre": "Ana"}
-                                """.formatted(emailUnico())))
-                .andExpect(status().isCreated())
+                                """.formatted(email)))
+                .andExpect(status().isAccepted())
+                .andExpect(content().string(not(containsString("contrasena-segura"))))
+                .andExpect(content().string(not(containsString("$2a$"))));
+
+        mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email": "%s", "password": "contrasena-segura"}
+                                """.formatted(email)))
+                .andExpect(status().isOk())
                 .andExpect(content().string(not(containsString("contrasena-segura"))))
                 .andExpect(content().string(not(containsString("$2a$"))))
                 .andExpect(jsonPath("$.password").doesNotExist())

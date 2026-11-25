@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -19,26 +20,51 @@ class AuthIntegrationTest extends TestBase {
     }
 
     @Test
-    void registroDevuelveToken() throws Exception {
+    void registroNoDevuelveTokenYDespuesSePuedeEntrar() throws Exception {
+        String email = emailUnico();
         mvc.perform(post("/api/v1/auth/registro")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(cuerpoRegistro(emailUnico(), "contrasena-segura")))
-                .andExpect(status().isCreated())
+                        .content(cuerpoRegistro(email, "contrasena-segura")))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.mensaje", notNullValue()))
+                .andExpect(jsonPath("$.token").doesNotExist());
+
+        mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email": "%s", "password": "contrasena-segura"}
+                                """.formatted(email)))
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token", notNullValue()))
                 .andExpect(jsonPath("$.tipo").value("Bearer"))
                 .andExpect(jsonPath("$.nombre").value("Ana"));
     }
 
     @Test
-    void registroConEmailRepetidoDa409() throws Exception {
+    void registroConEmailRepetidoRespondeIgualYNoTocaLaCuenta() throws Exception {
         String email = emailUnico();
-        mvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON)
+        String nuevo = mvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpoRegistro(email, "contrasena-segura")))
-                .andExpect(status().isCreated());
+                .andExpect(status().isAccepted())
+                .andReturn().getResponse().getContentAsString();
 
-        mvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON)
+        String repetido = mvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpoRegistro(email.toUpperCase(), "otra-contrasena")))
-                .andExpect(status().isConflict());
+                .andExpect(status().isAccepted())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(repetido).isEqualTo(nuevo);
+
+        // La contraseña del dueño sigue valiendo y la del segundo registro no.
+        mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email": "%s", "password": "contrasena-segura"}
+                                """.formatted(email)))
+                .andExpect(status().isOk());
+        mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email": "%s", "password": "otra-contrasena"}
+                                """.formatted(email)))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -55,7 +81,7 @@ class AuthIntegrationTest extends TestBase {
         String email = emailUnico();
         mvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpoRegistro(email, "contrasena-segura")))
-                .andExpect(status().isCreated());
+                .andExpect(status().isAccepted());
 
         mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .content("""

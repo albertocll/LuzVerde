@@ -17,7 +17,8 @@ La app guarda nombre, email, contraseña (solo su hash BCrypt), perfil profesion
 | Llenar la memoria del servidor probando miles de emails | Con más de 10.000 claves se borran las caducadas, como mucho una vez por minuto | `probarMilesDeEmailsNoLlenaLaMemoria` |
 | IP falseada con `X-Forwarded-For` | Por defecto se ignora la cabecera. Detrás de Railway, `FORWARD_HEADERS_STRATEGY=native` solo la acepta de proxies internos | Revisión de código |
 | Base de datos accesible desde la red local | Docker Compose publica PostgreSQL solo en `127.0.0.1` | Revisión de código |
-| Saber qué emails están registrados por el tiempo de respuesta | Se compara la contraseña también cuando el email no existe | Revisión de código |
+| Saber qué emails están registrados por el tiempo del login | Se compara la contraseña también cuando el email no existe | Revisión de código |
+| Saber qué emails están registrados usando el registro | El registro responde siempre `202` con el mismo mensaje y sin token. Si el email ya existe no cambia nada. El hash BCrypt se calcula en los dos casos para igualar el tiempo. La app entra después con el login | `registroConEmailRepetidoRespondeIgualYNoTocaLaCuenta`, `RegistroTiempoTest` |
 | Asignación masiva de campos | Los DTO solo aceptan campos editables. El dueño sale del token | `asignacionMasivaNoPermiteElegirIdNiDueno` |
 | Inyección SQL | Consultas de Spring Data con parámetros. Los enums se validan | `entradasMaliciosasNoRompenNadaNiFiltranTrazas` |
 | Trazas o mensajes internos en las respuestas | Manejador de errores final con mensaje genérico. `include-stacktrace: never` | `entradasMaliciosasNoRompenNadaNiFiltranTrazas` |
@@ -34,6 +35,7 @@ La app guarda nombre, email, contraseña (solo su hash BCrypt), perfil profesion
 
 ## pendiente
 
+- Verificar el email al registrarse. Hoy alguien puede registrar un email ajeno, intentar entrar con su contraseña y deducir por el fallo que el email ya tenía cuenta. El límite del login (5 fallos por email, 20 por IP en 15 minutos) frena esa vía, pero cerrarla del todo pide mandar un enlace por correo, y eso necesita un proveedor de email.
 - Forzar HTTPS en producción. Railway lo sirve por HTTPS y la app debe apuntar a esa URL (fase 5).
 - Poner `FORWARD_HEADERS_STRATEGY=native` en Railway, para que el límite por IP use la IP real (fase 5).
 - Cambiar `ddl-auto: update` por migraciones con Flyway antes de tener datos reales.
