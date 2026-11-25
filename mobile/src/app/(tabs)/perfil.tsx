@@ -5,7 +5,7 @@ import { api, ErrorApi } from '@/api';
 import { useAuth } from '@/auth';
 import { BarraProgreso } from '@/componentes/AvisoPerfil';
 import { AvisoError, Boton, BotonIcono, Campo, Cargando, Chip, Pantalla, Seccion, Tarjeta } from '@/componentes/ui';
-import { cargarUrlServidor, guardarUrlServidor } from '@/config';
+import { cargarUrlServidor, guardarUrlServidor, SERVIDOR_EDITABLE } from '@/config';
 import { esMesValido, oNull } from '@/formato';
 import { calcularProgreso } from '@/progresoPerfil';
 import { color, espacio, radio, texto } from '@/tema';
@@ -377,17 +377,19 @@ export default function PantallaPerfil() {
         estilo={{ marginTop: espacio.xl }}
       />
 
-      <Seccion titulo="Servidor">
-        <Campo
-          etiqueta="URL del backend"
-          value={url}
-          onChangeText={setUrl}
-          autoCapitalize="none"
-          keyboardType="url"
-          ayuda="En el emulador de Android, http://10.0.2.2:8080 es tu ordenador."
-        />
-        <Boton titulo="Guardar servidor" variante="secundario" alPulsar={guardarServidor} />
-      </Seccion>
+      {SERVIDOR_EDITABLE ? (
+        <Seccion titulo="Servidor">
+          <Campo
+            etiqueta="URL del backend"
+            value={url}
+            onChangeText={setUrl}
+            autoCapitalize="none"
+            keyboardType="url"
+            ayuda="En el emulador de Android, http://10.0.2.2:8080 es tu ordenador."
+          />
+          <Boton titulo="Guardar servidor" variante="secundario" alPulsar={guardarServidor} />
+        </Seccion>
+      ) : null}
 
       <Boton titulo="Cerrar sesión" icono="log-out-outline" variante="peligro" alPulsar={cerrarSesion} estilo={{ marginTop: espacio.xl }} />
       <Boton
