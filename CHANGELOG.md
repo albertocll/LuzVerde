@@ -7,6 +7,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 ### añadido
 
 - Selector de fecha nativo en candidaturas. En la web del modo demo sigue el campo de texto.
+- Flujos de Maestro en `mobile/.maestro`: login, candidatura y evaluación de oferta.
+- Exportar mis datos desde Perfil: un JSON con todo lo guardado de la cuenta (`GET /api/v1/cuenta/exportacion`).
 - Entornos de la app (`EXPO_PUBLIC_ENTORNO`) y `eas.json` con perfiles `desarrollo`, `preview` y `production`. En producción la URL del backend es fija y tiene que ser https.
 - Borrar evaluaciones y CV del historial (`DELETE /api/v1/evaluaciones/{id}` y `DELETE /api/v1/cv/{id}`), con botón en la app.
 - Vista previa web de la app y modo demo con datos inventados (`npm run web:demo`), fuera de la build de producción.
@@ -32,6 +34,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ### cambiado
 
+- OpenPDF 3.0.6 (antes 1.4.2). El paquete pasa de `com.lowagie` a `org.openpdf`.
 - El esquema de la base de datos sale de migraciones de Flyway. Hibernate ya no crea tablas, solo las valida. Las bases existentes se adoptan como versión 1 sin perder datos.
 - Los tests del backend corren contra PostgreSQL 17 real con Testcontainers en lugar de H2. Necesitan Docker.
 - La API pasa a `/api/v1`. La app ya usa las rutas nuevas.

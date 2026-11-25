@@ -1,0 +1,22 @@
+# Registro, cierre de sesión y vuelta a entrar con la misma cuenta.
+appId: es.albertocll.luzverde
+name: Login
+---
+- runFlow: _registro.yaml
+- tapOn: "Perfil"
+- scrollUntilVisible:
+    element: "Cerrar sesión"
+- tapOn: "Cerrar sesión"
+- tapOn: "Salir"
+- assertVisible: "Tu asesor de empleo.*"
+- tapOn: "Email"
+- inputText: ${output.email}
+- tapOn: "Contraseña"
+- inputText: "contrasena-e2e"
+- hideKeyboard
+- tapOn:
+    text: "Entrar"
+    index: 1
+- extendedWaitUntil:
+    visible: "Candidaturas"
+    timeout: 15000
