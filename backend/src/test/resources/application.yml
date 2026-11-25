@@ -3,9 +3,13 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create-drop
+      # Igual que en producción: el esquema sale de las migraciones de Flyway.
+      ddl-auto: validate
 
 luzverde:
+  # Todos los tests con MockMvc llegan desde 127.0.0.1. El límite real se prueba aparte.
+  registro:
+    max-por-ip: 100000
   app:
     version-minima: 1.2.3
   jwt:

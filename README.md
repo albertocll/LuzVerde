@@ -11,6 +11,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Claude API](https://img.shields.io/badge/Claude_API-Haiku-D97757?logo=anthropic&logoColor=white)](https://docs.anthropic.com/)
 
+**Web:** [luzverde-empleo.netlify.app](https://luzverde-empleo.netlify.app/) · [Privacidad](https://luzverde-empleo.netlify.app/privacidad.html) · [Términos](https://luzverde-empleo.netlify.app/terminos.html) · [Borrar la cuenta](https://luzverde-empleo.netlify.app/borrar-cuenta.html)
+
 ![Luz Verde: candidaturas, evaluación de una oferta y CV adaptado](docs/img/mockup.png)
 
 ---
@@ -71,7 +73,7 @@ Entra con cualquier email y contraseña. El modo demo no entra en la build de pr
 ### Backend
 - **Lenguaje:** Java 21
 - **Framework:** Spring Boot 3.5 (Web, Data JPA, Security, Validation, Actuator)
-- **Base de datos:** PostgreSQL 17
+- **Base de datos:** PostgreSQL 17 con migraciones de Flyway
 - **Autenticación:** JWT (jjwt) con BCrypt
 - **IA:** API de Claude (`claude-haiku-5-5`) con salida forzada por herramienta y esquema JSON fijo
 - **Documentos:** OpenPDF para el PDF y Apache POI para el DOCX
@@ -129,7 +131,7 @@ LuzVerde/
 │   └── src/demo/            API falsa del modo demo (solo web:demo)
 ├── docs/                    Arquitectura, decisiones, seguridad, interfaz y privacidad
 │   └── img/                 Mockup, GIF de la demo y capturas del README
-├── web/                     Página de presentación (Netlify)
+├── web/                     Página de presentación (luzverde-empleo.netlify.app)
 ├── .github/                 CI, CodeQL, Dependabot y plantillas
 ├── docker-compose.yml       PostgreSQL y backend para desarrollo local
 └── .env.example             Variables de entorno de ejemplo
