@@ -28,6 +28,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ### cambiado
 
+- El esquema de la base de datos sale de migraciones de Flyway. Hibernate ya no crea tablas, solo las valida. Las bases existentes se adoptan como versión 1 sin perder datos.
 - Los tests del backend corren contra PostgreSQL 17 real con Testcontainers en lugar de H2. Necesitan Docker.
 - La API pasa a `/api/v1`. La app ya usa las rutas nuevas.
 - El registro responde `202` con el mismo mensaje exista o no el email, y ya no devuelve token. La app entra justo después con el login.
