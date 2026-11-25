@@ -57,10 +57,11 @@ jobs:
       - name: OWASP Dependency-Check
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-        # Un NVD_API_KEY vacío cuenta como clave inválida: sin secreto se quita la variable.
+        # Una clave vacía cuenta como inválida: solo se pasa si existe el secreto.
         run: |
-          if [ -z "$NVD_API_KEY" ]; then unset NVD_API_KEY; fi
-          mvn -B -DskipTests dependency-check:check
+          CLAVE=()
+          if [ -n "$NVD_API_KEY" ]; then CLAVE=("-DnvdApiKey=$NVD_API_KEY"); fi
+          mvn -B -DskipTests "${CLAVE[@]}" dependency-check:check
 
       - name: Subir resultados a Code scanning
         if: always() && hashFiles('backend/target/dependency-check-report.sarif') != ''
