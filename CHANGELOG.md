@@ -28,10 +28,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 - Los tests del backend corren contra PostgreSQL 17 real con Testcontainers en lugar de H2. Necesitan Docker.
 - La API pasa a `/api/v1`. La app ya usa las rutas nuevas.
-- Cada respuesta de error lleva un `code` fijo (`EMAIL_TAKEN`, `AI_DAILY_LIMIT`...). La app elige su mensaje por él, así que un 429 del login ya no dice que se acabó la IA.
+- El registro responde `202` con el mismo mensaje exista o no el email, y ya no devuelve token. La app entra justo después con el login.
+- Cada respuesta de error lleva un `code` fijo (`INVALID_CREDENTIALS`, `AI_DAILY_LIMIT`...). La app elige su mensaje por él, así que un 429 del login ya no dice que se acabó la IA.
 
 ### seguridad
 
+- El registro ya no revela si un email tiene cuenta. Desaparece el `409 EMAIL_TAKEN` y el tiempo de respuesta es parecido en los dos casos.
 - Swagger queda apagado salvo con `SWAGGER_ENABLED=true`. Docker Compose local lo activa.
 - El token JWT lleva emisor y destinatario, y el backend los comprueba.
 - El límite de login borra las claves caducadas para que probar miles de emails no llene la memoria.

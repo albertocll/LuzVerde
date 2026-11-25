@@ -260,7 +260,7 @@ Todas las rutas salvo `/auth/**`, Swagger y `/actuator/health` piden la cabecera
 
 | Método | Ruta | Qué hace |
 |---|---|---|
-| POST | `/auth/registro` | Crea una cuenta y devuelve un token |
+| POST | `/auth/registro` | Crea una cuenta si el email está libre. Responde igual si ya existe y no devuelve token |
 | POST | `/auth/login` | Devuelve un token |
 | GET | `/candidaturas?estado=ENVIADA` | Lista tus candidaturas, con filtro opcional por estado |
 | GET | `/candidaturas/{id}` | Detalle de una candidatura |

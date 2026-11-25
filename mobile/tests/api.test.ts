@@ -1,4 +1,4 @@
-import { alExpirarSesion, api, ErrorApi, fijarToken } from '@/api';
+import { alExpirarSesion, api, ErrorApi, fijarToken, MENSAJE_REGISTRO_FALLIDO } from '@/api';
 
 jest.mock('expo-secure-store', () => ({
   getItemAsync: jest.fn(async () => 'http://servidor.test'),
@@ -108,6 +108,31 @@ describe('api', () => {
     fetchSimulado.mockResolvedValue(respuesta(401, { detail: 'Email o contraseña incorrectos' }));
     await expect(api.login('a@b.com', 'x')).rejects.toThrow('Email o contraseña incorrectos');
     expect(alCaducar).toHaveBeenCalledTimes(1);
+  });
+
+  it('tras registrarse entra con el login, porque el registro no trae token', async () => {
+    fetchSimulado
+      .mockResolvedValueOnce(respuesta(202, { mensaje: 'Si el email no tenía cuenta, ya está creada.' }))
+      .mockResolvedValueOnce(respuesta(200, { token: 'nuevo', usuarioId: 7, nombre: 'Ana' }));
+
+    const sesion = await api.registro('Ana', 'ana@ejemplo.com', 'secreta-larga');
+
+    expect(sesion).toEqual({ token: 'nuevo', usuarioId: 7, nombre: 'Ana' });
+    expect(fetchSimulado.mock.calls.map(([url]) => url)).toEqual([
+      'http://servidor.test/api/v1/auth/registro',
+      'http://servidor.test/api/v1/auth/login',
+    ]);
+  });
+
+  it('si el email ya tenía otra contraseña, no dice si existe', async () => {
+    fetchSimulado
+      .mockResolvedValueOnce(respuesta(202, { mensaje: 'Si el email no tenía cuenta, ya está creada.' }))
+      .mockResolvedValueOnce(respuesta(401, { code: 'INVALID_CREDENTIALS' }));
+
+    const error = await api.registro('Ana', 'ana@ejemplo.com', 'otra-larga').catch((e) => e);
+
+    expect(error).toBeInstanceOf(ErrorApi);
+    expect(error.message).toBe(MENSAJE_REGISTRO_FALLIDO);
   });
 
   it('acepta respuestas sin cuerpo', async () => {

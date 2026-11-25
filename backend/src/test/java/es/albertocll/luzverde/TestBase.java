@@ -50,15 +50,24 @@ public abstract class TestBase {
 
     /** Registra un usuario nuevo y devuelve su token. */
     protected String registrar() throws Exception {
-        String cuerpo = """
-                {"email": "%s", "password": "contrasena-segura", "nombre": "Prueba"}
-                """.formatted(emailUnico());
-        MvcResult resultado = mvc.perform(post("/api/v1/auth/registro")
+        return leer(registrarYEntrar(emailUnico(), "contrasena-segura")).get("token").asText();
+    }
+
+    /** Registra la cuenta y entra con ella, como hace la app. Devuelve la respuesta del login. */
+    protected MvcResult registrarYEntrar(String email, String password) throws Exception {
+        mvc.perform(post("/api/v1/auth/registro")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(cuerpo))
-                .andExpect(status().isCreated())
+                        .content("""
+                                {"email": "%s", "password": "%s", "nombre": "Prueba"}
+                                """.formatted(email, password)))
+                .andExpect(status().isAccepted());
+        return mvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email": "%s", "password": "%s"}
+                                """.formatted(email, password)))
+                .andExpect(status().isOk())
                 .andReturn();
-        return leer(resultado).get("token").asText();
     }
 
     protected JsonNode leer(MvcResult resultado) throws Exception {

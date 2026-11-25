@@ -29,11 +29,6 @@ public class ManejadorErrores {
         return problema(HttpStatus.NOT_FOUND, "NOT_FOUND", e.getMessage());
     }
 
-    @ExceptionHandler(ConflictoException.class)
-    public ProblemDetail conflicto(ConflictoException e) {
-        return problema(HttpStatus.CONFLICT, e.getCodigo(), e.getMessage());
-    }
-
     @ExceptionHandler(CredencialesInvalidasException.class)
     public ProblemDetail credenciales(CredencialesInvalidasException e) {
         return problema(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", e.getMessage());

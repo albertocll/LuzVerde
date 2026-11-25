@@ -38,13 +38,7 @@ class CuentaIntegrationTest extends TestBase {
     @Test
     void borrarLaCuentaBorraTodosSusDatos() throws Exception {
         String email = emailUnico();
-        var registro = mvc.perform(post("/api/v1/auth/registro")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"email": "%s", "password": "contrasena-segura", "nombre": "Prueba"}
-                                """.formatted(email)))
-                .andExpect(status().isCreated())
-                .andReturn();
+        var registro = registrarYEntrar(email, "contrasena-segura");
         String token = leer(registro).get("token").asText();
         long id = leer(registro).get("usuarioId").asLong();
         String otroToken = registrar();
