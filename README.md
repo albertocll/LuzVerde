@@ -71,7 +71,7 @@ Entra con cualquier email y contraseña. El modo demo no entra en la build de pr
 ### Backend
 - **Lenguaje:** Java 21
 - **Framework:** Spring Boot 3.5 (Web, Data JPA, Security, Validation, Actuator)
-- **Base de datos:** PostgreSQL 17
+- **Base de datos:** PostgreSQL 17 con migraciones de Flyway
 - **Autenticación:** JWT (jjwt) con BCrypt
 - **IA:** API de Claude (`claude-haiku-5-5`) con salida forzada por herramienta y esquema JSON fijo
 - **Documentos:** OpenPDF para el PDF y Apache POI para el DOCX

@@ -5,10 +5,17 @@ spring:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/luzverde}
     username: ${DB_USER:luzverde}
     password: ${DB_PASSWORD}
+  flyway:
+    # Las bases de datos creadas antes de Flyway (con ddl-auto: update) se marcan como
+    # versión 1 sin ejecutar V1, porque ya tienen esas tablas.
+    baseline-on-migrate: true
+    baseline-version: 1
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: update
+      # El esquema lo crean las migraciones de Flyway (db/migration). Hibernate solo comprueba
+      # al arrancar que las entidades coinciden con las tablas.
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: true

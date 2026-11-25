@@ -3,7 +3,8 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create-drop
+      # Igual que en producción: el esquema sale de las migraciones de Flyway.
+      ddl-auto: validate
 
 luzverde:
   app:
