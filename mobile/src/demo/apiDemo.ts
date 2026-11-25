@@ -74,6 +74,10 @@ export const apiDemo: typeof apiReal = {
     if (!e) throw new ErrorApi('No se ha encontrado.', 404);
     return pausa(e);
   },
+  borrarEvaluacion: async (id) => {
+    evaluaciones = evaluaciones.filter((e) => e.id !== id);
+    return pausa(undefined);
+  },
 
   generarCv: async () => {
     const nuevo: Cv = { ...cvs[0], id: siguienteId++, creadoEn: new Date().toISOString() };
@@ -81,6 +85,10 @@ export const apiDemo: typeof apiReal = {
     return pausa(nuevo, 900);
   },
   cvs: async () => pausa(cvs),
+  borrarCv: async (id) => {
+    cvs = cvs.filter((c) => c.id !== id);
+    return pausa(undefined);
+  },
   descargarCv: async () => {
     throw new ErrorApi('En el modo demo no se descargan archivos.', 0);
   },

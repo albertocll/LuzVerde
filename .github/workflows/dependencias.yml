@@ -54,14 +54,17 @@ jobs:
           key: nvd-${{ steps.semana.outputs.valor }}
           restore-keys: nvd-
 
+      # Dependency-Check 13 necesita una clave del NVD (gratis en nvd.nist.gov/developers/request-an-api-key).
+      # Sin el secreto NVD_API_KEY el análisis se salta con un aviso en vez de romper la CI.
       - name: OWASP Dependency-Check
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-        # Una clave vacía cuenta como inválida: solo se pasa si existe el secreto.
         run: |
-          CLAVE=()
-          if [ -n "$NVD_API_KEY" ]; then CLAVE=("-DnvdApiKey=$NVD_API_KEY"); fi
-          mvn -B -DskipTests "${CLAVE[@]}" dependency-check:check
+          if [ -z "$NVD_API_KEY" ]; then
+            echo "::warning title=Dependency-Check sin clave::Falta el secreto NVD_API_KEY. El análisis no se ha ejecutado."
+            exit 0
+          fi
+          mvn -B -DskipTests "-DnvdApiKey=$NVD_API_KEY" dependency-check:check
 
       - name: Subir resultados a Code scanning
         if: always() && hashFiles('backend/target/dependency-check-report.sarif') != ''
