@@ -1,0 +1,82 @@
+name: Dependencias
+
+# OWASP Dependency-Check contra la base de datos del NVD.
+# Falla si una dependencia del backend tiene una vulnerabilidad con CVSS 7 o más.
+on:
+  push:
+    branches: [main]
+    paths:
+      - backend/pom.xml
+      - backend/dependency-check-suppressions.xml
+      - .github/workflows/dependencias.yml
+  pull_request:
+    paths:
+      - backend/pom.xml
+      - backend/dependency-check-suppressions.xml
+      - .github/workflows/dependencias.yml
+  schedule:
+    - cron: '0 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependencias-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  owasp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      security-events: write
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Semana actual
+        id: semana
+        run: echo "valor=$(date +%G-%V)" >> "$GITHUB_OUTPUT"
+
+      # La primera descarga del NVD tarda varios minutos. Se guarda una vez por semana.
+      - uses: actions/cache@v5
+        with:
+          path: ~/.m2/repository/org/owasp/dependency-check-data
+          key: nvd-${{ steps.semana.outputs.valor }}
+          restore-keys: nvd-
+
+      # Dependency-Check 13 necesita una clave del NVD (gratis en nvd.nist.gov/developers/request-an-api-key).
+      # Sin el secreto NVD_API_KEY el análisis se salta con un aviso en vez de romper la CI.
+      - name: OWASP Dependency-Check
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          if [ -z "$NVD_API_KEY" ]; then
+            echo "::warning title=Dependency-Check sin clave::Falta el secreto NVD_API_KEY. El análisis no se ha ejecutado."
+            exit 0
+          fi
+          mvn -B -DskipTests "-DnvdApiKey=$NVD_API_KEY" dependency-check:check
+
+      - name: Subir resultados a Code scanning
+        if: always() && hashFiles('backend/target/dependency-check-report.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: backend/target/dependency-check-report.sarif
+          category: dependency-check
+
+      - name: Guardar informe
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: dependency-check
+          path: backend/target/dependency-check-report.html
+          if-no-files-found: ignore

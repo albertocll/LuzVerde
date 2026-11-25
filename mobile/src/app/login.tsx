@@ -6,7 +6,7 @@ import { ErrorApi } from '@/api';
 import { useAuth } from '@/auth';
 import { AvisoError, Boton, Campo, Pantalla } from '@/componentes/ui';
 import { Semaforo } from '@/componentes/Semaforo';
-import { cargarUrlServidor, guardarUrlServidor } from '@/config';
+import { cargarUrlServidor, guardarUrlServidor, SERVIDOR_EDITABLE } from '@/config';
 import { color, espacio, radio, texto } from '@/tema';
 
 export default function Login() {
@@ -113,20 +113,24 @@ export default function Login() {
         estilo={{ marginTop: espacio.s }}
       />
 
-      <Pressable onPress={() => setVerServidor((v) => !v)} style={estilos.servidor}>
-        <Ionicons name="server-outline" size={16} color={color.textoSuave} />
-        <Text style={texto.suave}>Servidor</Text>
-        <Ionicons name={verServidor ? 'chevron-up' : 'chevron-down'} size={16} color={color.textoSuave} />
-      </Pressable>
-      {verServidor ? (
-        <Campo
-          etiqueta="URL del backend"
-          value={url}
-          onChangeText={setUrl}
-          autoCapitalize="none"
-          keyboardType="url"
-          ayuda="En el emulador de Android, http://10.0.2.2:8080 apunta a tu ordenador."
-        />
+      {SERVIDOR_EDITABLE ? (
+        <>
+          <Pressable onPress={() => setVerServidor((v) => !v)} style={estilos.servidor}>
+            <Ionicons name="server-outline" size={16} color={color.textoSuave} />
+            <Text style={texto.suave}>Servidor</Text>
+            <Ionicons name={verServidor ? 'chevron-up' : 'chevron-down'} size={16} color={color.textoSuave} />
+          </Pressable>
+          {verServidor ? (
+            <Campo
+              etiqueta="URL del backend"
+              value={url}
+              onChangeText={setUrl}
+              autoCapitalize="none"
+              keyboardType="url"
+              ayuda="En el emulador de Android, http://10.0.2.2:8080 apunta a tu ordenador."
+            />
+          ) : null}
+        </>
       ) : null}
     </Pantalla>
   );

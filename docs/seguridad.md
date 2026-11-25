@@ -31,7 +31,7 @@ La app guarda nombre, email, contraseña (solo su hash BCrypt), perfil profesion
 | Endpoints de administración expuestos | Actuator solo expone `health` sin detalles | `soloElHealthDeActuatorEsPublico` |
 | Cabeceras inseguras | `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Cache-Control: no-store` | `cabecerasDeSeguridad` |
 | Token robado del móvil | Se guarda en `expo-secure-store` (Keystore de Android) | No automatizada |
-| Dependencias vulnerables | Dependabot semanal y CodeQL con consultas `security-extended` | GitHub Actions |
+| Dependencias vulnerables | Dependabot semanal, CodeQL con consultas `security-extended` y OWASP Dependency-Check (falla con CVSS 7 o más) | GitHub Actions (`dependencias.yml`) |
 | Secretos subidos al repo | `.env` ignorado y gitleaks en cada push | GitHub Actions |
 
 ## pendiente
