@@ -18,6 +18,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -177,5 +178,34 @@ class EvaluacionIntegrationTest extends TestBase {
 
         mvc.perform(get("/api/v1/evaluaciones/{id}", id).header(HttpHeaders.AUTHORIZATION, bearer(registrar())))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void borrarUnaEvaluacionLaQuitaDelHistorial() throws Exception {
+        String ana = registrar();
+        var resultado = mvc.perform(post("/api/v1/evaluaciones")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(ana))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpo(OFERTA)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long id = leer(resultado).get("id").asLong();
+
+        // Otro usuario no puede borrarla: responde como si no existiera.
+        mvc.perform(delete("/api/v1/evaluaciones/{id}", id).header(HttpHeaders.AUTHORIZATION, bearer(registrar())))
+                .andExpect(status().isNotFound());
+
+        mvc.perform(delete("/api/v1/evaluaciones/{id}", id).header(HttpHeaders.AUTHORIZATION, bearer(ana)))
+                .andExpect(status().isNoContent());
+        mvc.perform(get("/api/v1/evaluaciones/{id}", id).header(HttpHeaders.AUTHORIZATION, bearer(ana)))
+                .andExpect(status().isNotFound());
+        mvc.perform(get("/api/v1/evaluaciones").header(HttpHeaders.AUTHORIZATION, bearer(ana)))
+                .andExpect(jsonPath("$", hasSize(0)));
+        // El uso de IA del día sigue contado.
+        mvc.perform(post("/api/v1/evaluaciones")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(ana))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpo(OFERTA)))
+                .andExpect(jsonPath("$.usosRestantesHoy").value(8));
     }
 }
