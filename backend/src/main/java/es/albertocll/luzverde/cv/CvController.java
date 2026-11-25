@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -70,6 +71,14 @@ public class CvController {
     public ResponseEntity<byte[]> docx(@Parameter(hidden = true) @AuthenticationPrincipal UsuarioAutenticado usuario,
                                        @PathVariable Long id) {
         return archivo(service.docx(usuario.id(), id), DOCX, "cv-" + id + ".docx");
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Borra un CV generado, con su PDF, su DOCX y su carta")
+    public void borrar(@Parameter(hidden = true) @AuthenticationPrincipal UsuarioAutenticado usuario,
+                       @PathVariable Long id) {
+        service.borrar(usuario.id(), id);
     }
 
     private static ResponseEntity<byte[]> archivo(byte[] contenido, MediaType tipo, String nombre) {
