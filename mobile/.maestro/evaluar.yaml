@@ -1,0 +1,19 @@
+# Evaluar una oferta con la IA. Gasta un uso de IA de verdad: necesita ANTHROPIC_API_KEY
+# en el backend. Lleva la etiqueta ia para poder dejarlo fuera (--exclude-tags ia).
+appId: es.albertocll.luzverde
+name: Evaluar oferta
+tags:
+  - ia
+---
+- runFlow: _registro.yaml
+- tapOn: "Evaluar"
+- tapOn: "Texto de la oferta"
+- inputText: "Empresa Ejemplo busca desarrollador Java junior en Sevilla, modalidad híbrida. Requisitos: Java, Spring Boot y SQL. Salario de 22.000 a 25.000 euros."
+- hideKeyboard
+- tapOn:
+    text: "Evaluar"
+    index: 1
+- extendedWaitUntil:
+    visible: "Qué hacer ahora"
+    timeout: 60000
+- assertVisible: "Guardar como candidatura"

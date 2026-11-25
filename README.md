@@ -232,6 +232,8 @@ Los tests del backend arrancan un PostgreSQL 17 en Docker con Testcontainers, el
 
 ![Informe de JaCoCo con la cobertura por paquete: 94 % de las líneas](docs/img/cobertura.png)
 
+Pruebas de extremo a extremo con Maestro en `mobile/.maestro` (login, candidaturas y evaluación). Se lanzan en un emulador con `maestro test .maestro`; ver su [LEEME](mobile/.maestro/LEEME.md).
+
 ---
 
 ## 🚦 Evaluador de ofertas

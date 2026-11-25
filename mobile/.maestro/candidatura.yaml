@@ -1,0 +1,24 @@
+# Crear una candidatura, verla en la lista y borrarla.
+appId: es.albertocll.luzverde
+name: Candidatura
+---
+- runFlow: _registro.yaml
+- tapOn: "Nueva"
+- tapOn: "Puesto"
+- inputText: "Desarrollador Java junior"
+- tapOn: "Empresa"
+- inputText: "Empresa E2E"
+- hideKeyboard
+- tapOn: "Enviada"
+- tapOn: "Guardar"
+- assertVisible: "Desarrollador Java junior"
+- assertVisible: "Empresa E2E"
+- tapOn: "Desarrollador Java junior"
+- scrollUntilVisible:
+    element: "Borrar"
+- tapOn: "Borrar"
+# Confirmación del diálogo.
+- tapOn:
+    text: "Borrar"
+    index: 1
+- assertVisible: "Aún no tienes candidaturas"

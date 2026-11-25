@@ -1,0 +1,5 @@
+# Flujos que se ejecutan con "maestro test .maestro". _registro.yaml es un subflujo y queda fuera.
+flows:
+  - login.yaml
+  - candidatura.yaml
+  - evaluar.yaml
