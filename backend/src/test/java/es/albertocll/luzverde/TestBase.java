@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.UUID;
@@ -17,6 +20,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public abstract class TestBase {
+
+    /**
+     * Un PostgreSQL real, la misma versión que Docker Compose y producción. Se arranca una sola vez
+     * para todos los tests y Testcontainers lo borra al terminar. Necesita Docker.
+     */
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:17");
+
+    static {
+        POSTGRES.start();
+    }
+
+    @DynamicPropertySource
+    static void baseDeDatos(DynamicPropertyRegistry registro) {
+        registro.add("spring.datasource.url", POSTGRES::getJdbcUrl);
+        registro.add("spring.datasource.username", POSTGRES::getUsername);
+        registro.add("spring.datasource.password", POSTGRES::getPassword);
+    }
 
     @Autowired
     protected MockMvc mvc;

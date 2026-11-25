@@ -93,7 +93,7 @@ El generador de CV sigue el mismo camino. Después pasa la salida del modelo por
 
 | Dónde | Qué | Cómo |
 |---|---|---|
-| Backend | Integración de cada endpoint con MockMvc y H2 | `mvn verify` |
+| Backend | Integración de cada endpoint con MockMvc contra PostgreSQL 17 en Docker (Testcontainers) | `mvn verify` |
 | Backend | API de Claude simulada con MockRestServiceServer y `@MockitoBean` | Sin gastar créditos |
 | Backend | Seguridad: tokens manipulados, fuerza bruta, acceso a datos ajenos, cabeceras | `SeguridadTest` |
 | Backend | Cobertura de líneas mínima del 70 % | JaCoCo en `verify` |

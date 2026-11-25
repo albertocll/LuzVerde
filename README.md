@@ -76,7 +76,7 @@ Entra con cualquier email y contraseña. El modo demo no entra en la build de pr
 - **IA:** API de Claude (`claude-haiku-5-5`) con salida forzada por herramienta y esquema JSON fijo
 - **Documentos:** OpenPDF para el PDF y Apache POI para el DOCX
 - **Documentación de la API:** OpenAPI con Swagger UI (springdoc)
-- **Tests:** JUnit 5, MockMvc y H2 en memoria, cobertura con JaCoCo
+- **Tests:** JUnit 5, MockMvc y PostgreSQL 17 real con Testcontainers, cobertura con JaCoCo
 
 ### App móvil
 - **Framework:** React Native 0.88 con Expo SDK 58
@@ -209,7 +209,7 @@ npm run typecheck
 npm test
 ```
 
-Los tests del backend usan H2 en memoria y simulan la API de Claude: no necesitan Docker, PostgreSQL ni créditos. El informe de cobertura queda en `backend/target/site/jacoco/index.html`.
+Los tests del backend arrancan un PostgreSQL 17 en Docker con Testcontainers, el mismo motor que en producción, y simulan la API de Claude. Necesitan Docker abierto, pero no créditos. El informe de cobertura queda en `backend/target/site/jacoco/index.html`.
 
 ![Informe de JaCoCo con la cobertura por paquete: 94 % de las líneas](docs/img/cobertura.png)
 
