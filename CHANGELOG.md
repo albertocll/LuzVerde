@@ -26,6 +26,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ### cambiado
 
+- Los tests del backend corren contra PostgreSQL 17 real con Testcontainers en lugar de H2. Necesitan Docker.
 - La API pasa a `/api/v1`. La app ya usa las rutas nuevas.
 - El registro responde `202` con el mismo mensaje exista o no el email, y ya no devuelve token. La app entra justo después con el login.
 - Cada respuesta de error lleva un `code` fijo (`INVALID_CREDENTIALS`, `AI_DAILY_LIMIT`...). La app elige su mensaje por él, así que un 429 del login ya no dice que se acabó la IA.
