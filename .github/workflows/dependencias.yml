@@ -47,7 +47,7 @@ jobs:
         id: semana
         run: echo "valor=$(date +%G-%V)" >> "$GITHUB_OUTPUT"
 
-      # La primera descarga del NVD tarda mucho sin clave. Se guarda una vez por semana.
+      # La primera descarga del NVD tarda varios minutos. Se guarda una vez por semana.
       - uses: actions/cache@v5
         with:
           path: ~/.m2/repository/org/owasp/dependency-check-data
