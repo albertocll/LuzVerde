@@ -1,3 +1,4 @@
+import { File } from 'expo-file-system';
 import { alExpirarSesion, api, ErrorApi, fijarToken, MENSAJE_REGISTRO_FALLIDO } from '@/api';
 
 jest.mock('expo-secure-store', () => ({
@@ -7,7 +8,10 @@ jest.mock('expo-secure-store', () => ({
 }));
 
 jest.mock('expo-file-system', () => ({
-  File: jest.fn(),
+  File: Object.assign(
+    jest.fn(() => ({ exists: false })),
+    { createDownloadTask: jest.fn(() => ({ downloadAsync: async () => ({ uri: 'file:///cache/datos.json' }) })) },
+  ),
   Paths: { cache: '/cache' },
 }));
 
@@ -150,6 +154,16 @@ describe('api', () => {
     const [url, opciones] = fetchSimulado.mock.calls[0];
     expect(url).toBe('http://servidor.test/api/v1/cuenta');
     expect(opciones.method).toBe('DELETE');
+    expect(opciones.headers.Authorization).toBe('Bearer mi-token');
+  });
+
+  it('exporta los datos descargando /cuenta/exportacion con el token', async () => {
+    fijarToken('mi-token');
+
+    await expect(api.exportarDatos()).resolves.toBe('file:///cache/datos.json');
+
+    const [url, , opciones] = (File as unknown as { createDownloadTask: jest.Mock }).createDownloadTask.mock.calls[0];
+    expect(url).toBe('http://servidor.test/api/v1/cuenta/exportacion');
     expect(opciones.headers.Authorization).toBe('Bearer mi-token');
   });
 });

@@ -23,6 +23,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -100,5 +105,62 @@ class CuentaIntegrationTest extends TestBase {
     @Test
     void sinTokenNoSePuedeBorrar() throws Exception {
         mvc.perform(delete("/api/v1/cuenta")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void exportarDevuelveTodosLosDatosYSoloLosPropios() throws Exception {
+        String email = emailUnico();
+        var registro = registrarYEntrar(email, "contrasena-segura");
+        String token = leer(registro).get("token").asText();
+        long id = leer(registro).get("usuarioId").asLong();
+        String otroToken = registrar();
+
+        mvc.perform(put("/api/v1/perfil")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"ubicacion": "Sevilla", "tecnologias": [{"nombre": "Java", "nivel": "SOLIDO"}]}
+                                """))
+                .andExpect(status().isOk());
+        for (String t : new String[]{token, otroToken}) {
+            mvc.perform(post("/api/v1/candidaturas")
+                            .header(HttpHeaders.AUTHORIZATION, bearer(t))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"empresa": "Empresa", "puesto": "Java junior", "estado": "ENVIADA",
+                                     "fecha": "2026-11-20"}
+                                    """))
+                    .andExpect(status().isCreated());
+        }
+        Usuario usuario = usuarios.getReferenceById(id);
+        Evaluacion evaluacion = new Evaluacion(usuario, "Texto de la oferta que pegó el usuario");
+        evaluacion.setSemaforo(Semaforo.AMARILLO);
+        evaluaciones.save(evaluacion);
+        Cv cv = new Cv(usuario);
+        cv.setCarta("Carta de prueba");
+        cv.setPdf(new byte[]{1});
+        cv.setDocx(new byte[]{1});
+        cvs.save(cv);
+        usosIa.save(new UsoIa(id, "CV"));
+
+        mvc.perform(get("/api/v1/cuenta/exportacion").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, containsString("luz-verde-datos-")))
+                .andExpect(jsonPath("$.cuenta.email").value(email))
+                .andExpect(jsonPath("$.perfil.ubicacion").value("Sevilla"))
+                .andExpect(jsonPath("$.candidaturas", hasSize(1)))
+                .andExpect(jsonPath("$.evaluaciones[0].ofertaTexto").value("Texto de la oferta que pegó el usuario"))
+                .andExpect(jsonPath("$.evaluaciones[0].semaforo").value("AMARILLO"))
+                .andExpect(jsonPath("$.cvs[0].carta").value("Carta de prueba"))
+                .andExpect(jsonPath("$.cvs[0].urlPdf").value("/api/v1/cv/" + cv.getId() + "/pdf"))
+                .andExpect(jsonPath("$.usosIa[0].tipo").value("CV"))
+                .andExpect(content().string(not(containsString("contrasena-segura"))))
+                .andExpect(content().string(not(containsString("passwordHash"))))
+                .andExpect(content().string(not(containsString("$2a$"))));
+    }
+
+    @Test
+    void exportarSinTokenDa401() throws Exception {
+        mvc.perform(get("/api/v1/cuenta/exportacion")).andExpect(status().isUnauthorized());
     }
 }

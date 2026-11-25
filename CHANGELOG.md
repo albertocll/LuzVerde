@@ -6,6 +6,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ### añadido
 
+- Exportar mis datos desde Perfil: un JSON con todo lo guardado de la cuenta (`GET /api/v1/cuenta/exportacion`).
 - Vista previa web de la app y modo demo con datos inventados (`npm run web:demo`), fuera de la build de producción.
 - README con mockup, capturas y diagrama de arquitectura.
 - GIF de la demo, CV en PDF de ejemplo, Swagger UI e informe de cobertura en el README.

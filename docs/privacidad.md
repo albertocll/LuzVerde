@@ -32,7 +32,7 @@ Mientras la cuenta exista. Desde Perfil, "Borrar cuenta y datos" borra al moment
 
 ## derechos
 
-El usuario puede pedir acceso, rectificación, supresión, portabilidad y oposición escribiendo a [email]. También puede reclamar ante la Agencia Española de Protección de Datos (aepd.es).
+Desde Perfil, "Exportar mis datos" descarga al momento un JSON con la cuenta, el perfil, las candidaturas, las evaluaciones con el texto de cada oferta, los CV y los usos de IA (`GET /api/v1/cuenta/exportacion`). Eso cubre el acceso y la portabilidad. El usuario también puede pedir acceso, rectificación, supresión, portabilidad y oposición escribiendo a [email]. También puede reclamar ante la Agencia Española de Protección de Datos (aepd.es).
 
 ## seguridad
 

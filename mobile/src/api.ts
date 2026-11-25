@@ -159,6 +159,24 @@ const apiServidor = {
     peticion<Candidatura>(`/candidaturas/${id}`, { method: 'PUT', body: json(datos) }),
   borrarCandidatura: (id: number) => peticion<void>(`/candidaturas/${id}`, { method: 'DELETE' }),
 
+  /** Descarga en JSON todos los datos de la cuenta a la caché del móvil y devuelve su URI local. */
+  async exportarDatos(): Promise<string> {
+    const base = await cargarUrlServidor();
+    const fecha = new Date().toISOString().slice(0, 10);
+    const destino = new File(Paths.cache, `luz-verde-datos-${fecha}.json`);
+    if (destino.exists) {
+      destino.delete();
+    }
+    const tarea = File.createDownloadTask(`${base}${PREFIJO_API}/cuenta/exportacion`, destino, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    const archivo = await tarea.downloadAsync();
+    if (!archivo) {
+      throw new ErrorApi('La descarga no se ha completado.', 0);
+    }
+    return archivo.uri;
+  },
+
   /** Borra la cuenta y todos sus datos en el servidor. No se puede deshacer. */
   borrarCuenta: () => peticion<void>('/cuenta', { method: 'DELETE' }),
 

@@ -11,5 +11,8 @@ public interface EvaluacionRepository extends JpaRepository<Evaluacion, Long> {
 
     Optional<Evaluacion> findByIdAndUsuarioId(Long id, Long usuarioId);
 
+    /** Todo el historial, para exportar los datos del usuario. */
+    List<Evaluacion> findByUsuarioIdOrderByCreadoEnDesc(Long usuarioId);
+
     void deleteByUsuarioId(Long usuarioId);
 }
