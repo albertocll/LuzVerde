@@ -7,6 +7,9 @@ spring:
       ddl-auto: validate
 
 luzverde:
+  # Todos los tests con MockMvc llegan desde 127.0.0.1. El límite real se prueba aparte.
+  registro:
+    max-por-ip: 100000
   app:
     version-minima: 1.2.3
   jwt:

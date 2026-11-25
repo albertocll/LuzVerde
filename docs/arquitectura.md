@@ -24,7 +24,7 @@ Paquetes de `es.albertocll.luzverde`:
 
 | Paquete | Qué hace |
 |---|---|
-| `auth` | Registro, login, emisión de JWT y límite de intentos fallidos |
+| `auth` | Registro, login, emisión de JWT, límite de intentos fallidos y límite de registros por IP |
 | `seguridad` | Validación del token en cada petición |
 | `usuario` | Entidad y repositorio de usuarios |
 | `candidatura` | CRUD de candidaturas, filtradas siempre por el usuario del token |
