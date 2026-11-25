@@ -1,4 +1,4 @@
-import { esFechaValida, esMesValido, fechaCorta, hoyIso, oNull } from '@/formato';
+import { dateAIso, esFechaValida, esMesValido, fechaCorta, hoyIso, isoADate, oNull } from '@/formato';
 import { normalizarUrl } from '@/config';
 
 jest.mock('expo-secure-store', () => ({
@@ -8,6 +8,16 @@ jest.mock('expo-secure-store', () => ({
 }));
 
 describe('formato', () => {
+  it('pasa de AAAA-MM-DD a Date local y vuelve igual', () => {
+    const fecha = isoADate('2026-03-29');
+    expect([fecha.getFullYear(), fecha.getMonth(), fecha.getDate()]).toEqual([2026, 2, 29]);
+    expect(dateAIso(fecha)).toBe('2026-03-29');
+  });
+
+  it('con una fecha mal escrita abre el calendario en hoy', () => {
+    expect(dateAIso(isoADate('29/03/2026'))).toBe(hoyIso());
+  });
+
   it('muestra fechas cortas en español', () => {
     expect(fechaCorta('2026-11-23')).toBe('23 nov 2026');
     expect(fechaCorta('2026-01-05T10:00:00Z')).toBe('5 ene 2026');

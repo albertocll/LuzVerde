@@ -8,10 +8,21 @@ export function fechaCorta(valor: string): string {
 }
 
 export function hoyIso(): string {
-  const d = new Date();
-  const mes = String(d.getMonth() + 1).padStart(2, '0');
-  const dia = String(d.getDate()).padStart(2, '0');
-  return `${d.getFullYear()}-${mes}-${dia}`;
+  return dateAIso(new Date());
+}
+
+/** "2026-11-23" pasa a un Date a medianoche en la hora local. Si no es válida, hoy. */
+export function isoADate(valor: string): Date {
+  if (!esFechaValida(valor)) return new Date();
+  const [anio, mes, dia] = valor.split('-').map(Number);
+  return new Date(anio, mes - 1, dia);
+}
+
+/** Un Date pasa a "2026-11-23" con la fecha local, sin desfase por la zona horaria. */
+export function dateAIso(fecha: Date): string {
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+  const dia = String(fecha.getDate()).padStart(2, '0');
+  return `${fecha.getFullYear()}-${mes}-${dia}`;
 }
 
 export function esFechaValida(valor: string): boolean {
