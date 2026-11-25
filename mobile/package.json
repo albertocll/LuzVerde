@@ -39,7 +39,8 @@
     "test": "jest",
     "web": "expo start --web",
     "web:demo": "cross-env EXPO_PUBLIC_DEMO=1 expo start --web",
-    "export:demo": "cross-env EXPO_PUBLIC_DEMO=1 expo export --platform web --output-dir dist-demo"
+    "export:demo": "cross-env EXPO_PUBLIC_DEMO=1 expo export --platform web --output-dir dist-demo",
+    "eas-build-pre-install": "node scripts/comprobar-entorno.js"
   },
   "private": true,
   "jest": {

@@ -92,7 +92,7 @@ Entra con cualquier email y contraseña. El modo demo no entra en la build de pr
 - **CI:** GitHub Actions en cada push (tests del backend con cobertura mínima del 70 %, typecheck y tests de la app)
 - **Análisis:** CodeQL con consultas `security-extended`
 - **Secretos:** gitleaks en cada push
-- **Dependencias:** Dependabot semanal
+- **Dependencias:** Dependabot semanal y OWASP Dependency-Check cada lunes y en cada cambio del `pom.xml`
 
 ---
 
@@ -197,6 +197,23 @@ En el emulador, `http://10.0.2.2:8080` apunta al backend de tu ordenador. La URL
 | `npm run export:demo` | Genera la web del modo demo en `dist-demo/` |
 | `npm run typecheck` | Comprueba los tipos |
 | `npm test` | Ejecuta los tests |
+
+### Builds con EAS
+
+`mobile/eas.json` tiene tres perfiles:
+
+| Perfil | Sale | Entorno | Backend |
+|---|---|---|---|
+| `desarrollo` | APK | `desarrollo` | Se cambia desde la app |
+| `preview` | APK | `produccion` | Fijo, `EXPO_PUBLIC_API_URL` |
+| `production` | AAB para Google Play | `produccion` | Fijo, `EXPO_PUBLIC_API_URL` |
+
+En producción la app no enseña el campo Servidor y usa siempre la URL de la build. `EXPO_PUBLIC_API_URL` se crea en expo.dev (Environment variables) y tiene que ser `https`: si no, `scripts/comprobar-entorno.js` para la build antes de empezar.
+
+```bash
+cd mobile
+npx eas-cli build --platform android --profile production
+```
 
 ---
 
@@ -307,6 +324,13 @@ Cada riesgo, su medida y el test que lo cubre están en [seguridad](docs/segurid
 | `ANTHROPIC_MODELO` | No | Modelo. Por defecto `claude-haiku-5-5` |
 | `ANTHROPIC_MAX_TOKENS` | No | Tope de tokens de salida por llamada. Por defecto 2048 |
 | `LIMITE_IA_DIARIO` | No | Usos de IA por usuario y día. Por defecto 10 |
+
+En la app (se fijan al construir):
+
+| Variable | Uso |
+|---|---|
+| `EXPO_PUBLIC_ENTORNO` | `desarrollo` (por defecto) o `produccion`. La ponen los perfiles de `eas.json` |
+| `EXPO_PUBLIC_API_URL` | URL del backend. Obligatoria y `https` en producción |
 
 ---
 

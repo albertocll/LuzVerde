@@ -83,3 +83,9 @@ Hasta ahora Hibernate creaba las tablas con `ddl-auto: update`. Eso no borra col
 Las bases que ya existían, como la de Docker Compose en local, se marcan como versión 1 sin ejecutar `V1` (`baseline-on-migrate`), porque ya tienen esas tablas. Se comprobó cargando el esquema que creaba Hibernate y arrancando: Flyway hace el baseline, aplica `V2` y la validación pasa.
 
 Un cambio en una entidad ahora necesita su migración `V<n>__descripcion.sql`. Las migraciones ya publicadas no se tocan.
+
+## 14. entornos de la app fijados al construir
+
+Fecha: 2026-11-25
+
+La app tiene dos entornos, `desarrollo` y `produccion`, elegidos con `EXPO_PUBLIC_ENTORNO` al construir. En desarrollo la URL del backend se cambia desde la app, que es lo cómodo con el emulador. En producción la URL viene de `EXPO_PUBLIC_API_URL`, la app no deja tocarla y la build falla si no es https. Así un usuario de Google Play no puede apuntar la app a otro servidor por error, y una build sin URL no llega a la tienda.

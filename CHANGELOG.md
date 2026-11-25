@@ -7,6 +7,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 ### añadido
 
 - Selector de fecha nativo en candidaturas. En la web del modo demo sigue el campo de texto.
+- Entornos de la app (`EXPO_PUBLIC_ENTORNO`) y `eas.json` con perfiles `desarrollo`, `preview` y `production`. En producción la URL del backend es fija y tiene que ser https.
 - Borrar evaluaciones y CV del historial (`DELETE /api/v1/evaluaciones/{id}` y `DELETE /api/v1/cv/{id}`), con botón en la app.
 - Vista previa web de la app y modo demo con datos inventados (`npm run web:demo`), fuera de la build de producción.
 - README con mockup, capturas y diagrama de arquitectura.
@@ -14,6 +15,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 - Borrar la cuenta y todos sus datos desde Perfil (`DELETE /api/v1/cuenta`). El token de una cuenta borrada deja de valer.
 - Aviso de "Hay una versión nueva" cuando la app es más antigua que `APP_VERSION_MINIMA` (`GET /api/v1/version`).
 - Páginas web de privacidad, términos de uso y borrado de cuenta, enlazadas desde la landing.
+- OWASP Dependency-Check en GitHub Actions: cada lunes y en cada cambio del `pom.xml`. Falla con vulnerabilidades de CVSS 7 o más.
 - Límite de registros: 10 peticiones por IP y hora.
 - Tests con Tomcat real de la IP del cliente detrás del proxy (`X-Forwarded-For`).
 
