@@ -2,6 +2,7 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, Linking, Text, View } from 'react-native';
 import { api, ErrorApi } from '@/api';
+import { CampoFecha } from '@/componentes/CampoFecha';
 import { AvisoError, Boton, Campo, Cargando, Chip, Pantalla } from '@/componentes/ui';
 import { esFechaValida, hoyIso, oNull } from '@/formato';
 import { color, espacio, ESTADOS, texto } from '@/tema';
@@ -126,14 +127,7 @@ export default function DetalleCandidatura() {
             ))}
           </View>
 
-          <Campo
-            etiqueta="Fecha"
-            value={fecha}
-            onChangeText={setFecha}
-            placeholder="AAAA-MM-DD"
-            keyboardType="numbers-and-punctuation"
-            error={campos.fecha}
-          />
+          <CampoFecha etiqueta="Fecha" valor={fecha} alCambiar={setFecha} error={campos.fecha} />
           <Campo etiqueta="Notas" value={notas} onChangeText={setNotas} multiline placeholder="Contactos, próximos pasos..." />
 
           <View style={{ gap: espacio.s, marginTop: espacio.s }}>

@@ -6,6 +6,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ### añadido
 
+- Selector de fecha nativo en candidaturas. En la web del modo demo sigue el campo de texto.
 - Borrar evaluaciones y CV del historial (`DELETE /api/v1/evaluaciones/{id}` y `DELETE /api/v1/cv/{id}`), con botón en la app.
 - Vista previa web de la app y modo demo con datos inventados (`npm run web:demo`), fuera de la build de producción.
 - README con mockup, capturas y diagrama de arquitectura.
