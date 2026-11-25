@@ -6,6 +6,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ### añadido
 
+- Modo oscuro que sigue el tema del sistema al abrir la app.
 - Entornos de la app (`EXPO_PUBLIC_ENTORNO`) y `eas.json` con perfiles `desarrollo`, `preview` y `production`. En producción la URL del backend es fija y tiene que ser https.
 - Borrar evaluaciones y CV del historial (`DELETE /api/v1/evaluaciones/{id}` y `DELETE /api/v1/cv/{id}`), con botón en la app.
 - Vista previa web de la app y modo demo con datos inventados (`npm run web:demo`), fuera de la build de producción.
