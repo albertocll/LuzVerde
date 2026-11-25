@@ -3,7 +3,6 @@ package es.albertocll.luzverde.auth;
 import es.albertocll.luzverde.auth.AuthDtos.LoginRequest;
 import es.albertocll.luzverde.auth.AuthDtos.RegistroRequest;
 import es.albertocll.luzverde.auth.AuthDtos.TokenResponse;
-import es.albertocll.luzverde.error.ConflictoException;
 import es.albertocll.luzverde.error.CredencialesInvalidasException;
 import es.albertocll.luzverde.seguridad.JwtService;
 import es.albertocll.luzverde.usuario.Usuario;
@@ -35,17 +34,20 @@ public class AuthService {
         this.hashFalso = passwordEncoder.encode(UUID.randomUUID().toString());
     }
 
+    /**
+     * Crea la cuenta si el email está libre. Si ya existe no cambia nada y responde igual, para que
+     * nadie pueda usar el registro para saber qué emails tienen cuenta. Tampoco devuelve token: la
+     * app entra después con el login, que solo funciona con la contraseña del dueño.
+     */
     @Transactional
-    public TokenResponse registrar(RegistroRequest peticion) {
+    public void registrar(RegistroRequest peticion) {
         String email = normalizar(peticion.email());
+        // El hash se calcula siempre, exista o no el email, para que el tiempo de respuesta no lo delate.
+        String hash = passwordEncoder.encode(peticion.password());
         if (usuarios.existsByEmailIgnoreCase(email)) {
-            throw new ConflictoException("EMAIL_TAKEN", "Ya existe una cuenta con ese email");
+            return;
         }
-        Usuario usuario = usuarios.save(new Usuario(
-                email,
-                passwordEncoder.encode(peticion.password()),
-                peticion.nombre().trim()));
-        return token(usuario);
+        usuarios.save(new Usuario(email, hash, peticion.nombre().trim()));
     }
 
     @Transactional(readOnly = true)
