@@ -28,11 +28,11 @@ Para guardar las candidaturas del usuario, evaluar ofertas contra su perfil y ge
 
 ## cuánto tiempo se guardan
 
-Mientras la cuenta exista. Desde Perfil, "Borrar cuenta y datos" borra al momento la cuenta, el perfil, las candidaturas, las evaluaciones, los CV y el registro de usos de IA (`DELETE /api/v1/cuenta`). No quedan copias en la base de datos.
+Mientras la cuenta exista. Desde Perfil, "Borrar cuenta y datos" borra al momento la cuenta, el perfil, las candidaturas, las evaluaciones, los CV y el registro de usos de IA (`DELETE /api/v1/cuenta`). No quedan copias en la base de datos. También se puede borrar una evaluación o un CV suelto desde su pantalla.
 
 ## derechos
 
-El usuario puede pedir acceso, rectificación, supresión, portabilidad y oposición escribiendo a [email]. También puede reclamar ante la Agencia Española de Protección de Datos (aepd.es).
+Desde Perfil, "Exportar mis datos" descarga al momento un JSON con la cuenta, el perfil, las candidaturas, las evaluaciones con el texto de cada oferta, los CV y los usos de IA (`GET /api/v1/cuenta/exportacion`). Eso cubre el acceso y la portabilidad. El usuario también puede pedir acceso, rectificación, supresión, portabilidad y oposición escribiendo a [email]. También puede reclamar ante la Agencia Española de Protección de Datos (aepd.es).
 
 ## seguridad
 

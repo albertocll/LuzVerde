@@ -12,22 +12,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /** Cada error lleva un code fijo. La app traduce por él, así que no puede cambiar sin avisar. */
 class CodigosErrorTest extends TestBase {
 
-    private static String registro(String email) {
-        return """
-                {"email": "%s", "password": "contrasena-segura", "nombre": "Prueba"}
-                """.formatted(email);
-    }
-
-    @Test
-    void emailRepetido() throws Exception {
-        String email = emailUnico();
-        mvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON).content(registro(email)))
-                .andExpect(status().isCreated());
-        mvc.perform(post("/api/v1/auth/registro").contentType(MediaType.APPLICATION_JSON).content(registro(email)))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("EMAIL_TAKEN"));
-    }
-
     @Test
     void credencialesInvalidas() throws Exception {
         mvc.perform(post("/api/v1/auth/login")

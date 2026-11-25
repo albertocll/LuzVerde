@@ -2,6 +2,7 @@ package es.albertocll.luzverde.auth;
 
 import es.albertocll.luzverde.auth.AuthDtos.LoginRequest;
 import es.albertocll.luzverde.auth.AuthDtos.RegistroRequest;
+import es.albertocll.luzverde.auth.AuthDtos.RegistroResponse;
 import es.albertocll.luzverde.auth.AuthDtos.TokenResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
@@ -21,17 +22,26 @@ import org.springframework.web.bind.annotation.RestController;
 @SecurityRequirements
 public class AuthController {
 
-    private final AuthService authService;
+    static final String MENSAJE_REGISTRO =
+            "Si el email no tenía cuenta, ya está creada. Entra con tu email y contraseña.";
 
-    public AuthController(AuthService authService) {
+    private final AuthService authService;
+    private final LimiteRegistroService limiteRegistro;
+
+    public AuthController(AuthService authService, LimiteRegistroService limiteRegistro) {
         this.authService = authService;
+        this.limiteRegistro = limiteRegistro;
     }
 
     @PostMapping("/registro")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Crea una cuenta y devuelve un token")
-    public TokenResponse registro(@Valid @RequestBody RegistroRequest peticion) {
-        return authService.registrar(peticion);
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @Operation(summary = "Crea una cuenta si el email está libre",
+            description = "Responde lo mismo exista o no el email. Para obtener el token, llama después a /login. "
+                    + "Como mucho 10 peticiones por IP y hora.")
+    public RegistroResponse registro(@Valid @RequestBody RegistroRequest peticion, HttpServletRequest request) {
+        limiteRegistro.comprobarYRegistrar(request.getRemoteAddr());
+        authService.registrar(peticion);
+        return new RegistroResponse(MENSAJE_REGISTRO);
     }
 
     @PostMapping("/login")

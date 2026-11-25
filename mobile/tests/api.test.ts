@@ -1,4 +1,5 @@
-import { alExpirarSesion, api, ErrorApi, fijarToken } from '@/api';
+import { File } from 'expo-file-system';
+import { alExpirarSesion, api, ErrorApi, fijarToken, MENSAJE_REGISTRO_FALLIDO } from '@/api';
 
 jest.mock('expo-secure-store', () => ({
   getItemAsync: jest.fn(async () => 'http://servidor.test'),
@@ -7,7 +8,10 @@ jest.mock('expo-secure-store', () => ({
 }));
 
 jest.mock('expo-file-system', () => ({
-  File: jest.fn(),
+  File: Object.assign(
+    jest.fn(() => ({ exists: false })),
+    { createDownloadTask: jest.fn(() => ({ downloadAsync: async () => ({ uri: 'file:///cache/datos.json' }) })) },
+  ),
   Paths: { cache: '/cache' },
 }));
 
@@ -110,6 +114,31 @@ describe('api', () => {
     expect(alCaducar).toHaveBeenCalledTimes(1);
   });
 
+  it('tras registrarse entra con el login, porque el registro no trae token', async () => {
+    fetchSimulado
+      .mockResolvedValueOnce(respuesta(202, { mensaje: 'Si el email no tenía cuenta, ya está creada.' }))
+      .mockResolvedValueOnce(respuesta(200, { token: 'nuevo', usuarioId: 7, nombre: 'Ana' }));
+
+    const sesion = await api.registro('Ana', 'ana@ejemplo.com', 'secreta-larga');
+
+    expect(sesion).toEqual({ token: 'nuevo', usuarioId: 7, nombre: 'Ana' });
+    expect(fetchSimulado.mock.calls.map(([url]) => url)).toEqual([
+      'http://servidor.test/api/v1/auth/registro',
+      'http://servidor.test/api/v1/auth/login',
+    ]);
+  });
+
+  it('si el email ya tenía otra contraseña, no dice si existe', async () => {
+    fetchSimulado
+      .mockResolvedValueOnce(respuesta(202, { mensaje: 'Si el email no tenía cuenta, ya está creada.' }))
+      .mockResolvedValueOnce(respuesta(401, { code: 'INVALID_CREDENTIALS' }));
+
+    const error = await api.registro('Ana', 'ana@ejemplo.com', 'otra-larga').catch((e) => e);
+
+    expect(error).toBeInstanceOf(ErrorApi);
+    expect(error.message).toBe(MENSAJE_REGISTRO_FALLIDO);
+  });
+
   it('acepta respuestas sin cuerpo', async () => {
     fijarToken('t');
     fetchSimulado.mockResolvedValue(respuesta(204));
@@ -126,5 +155,29 @@ describe('api', () => {
     expect(url).toBe('http://servidor.test/api/v1/cuenta');
     expect(opciones.method).toBe('DELETE');
     expect(opciones.headers.Authorization).toBe('Bearer mi-token');
+  });
+
+  it('exporta los datos descargando /cuenta/exportacion con el token', async () => {
+    fijarToken('mi-token');
+
+    await expect(api.exportarDatos()).resolves.toBe('file:///cache/datos.json');
+
+    const [url, , opciones] = (File as unknown as { createDownloadTask: jest.Mock }).createDownloadTask.mock.calls[0];
+    expect(url).toBe('http://servidor.test/api/v1/cuenta/exportacion');
+    expect(opciones.headers.Authorization).toBe('Bearer mi-token');
+  });
+
+  it('borra evaluaciones y CV con DELETE', async () => {
+    fijarToken('t');
+    fetchSimulado.mockResolvedValue(respuesta(204));
+
+    await api.borrarEvaluacion(7);
+    await api.borrarCv(9);
+
+    const urls = fetchSimulado.mock.calls.map(([url, opciones]: [string, RequestInit]) => `${opciones.method} ${url}`);
+    expect(urls).toEqual([
+      'DELETE http://servidor.test/api/v1/evaluaciones/7',
+      'DELETE http://servidor.test/api/v1/cv/9',
+    ]);
   });
 });

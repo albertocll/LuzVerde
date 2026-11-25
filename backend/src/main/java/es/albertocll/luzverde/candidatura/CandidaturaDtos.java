@@ -42,7 +42,7 @@ public final class CandidaturaDtos {
             LocalDate fecha,
             String notas) {
 
-        static CandidaturaResponse de(Candidatura c) {
+        public static CandidaturaResponse de(Candidatura c) {
             return new CandidaturaResponse(
                     c.getId(), c.getEmpresa(), c.getPuesto(), c.getEnlace(),
                     c.getEstado(), c.getFecha(), c.getNotas());

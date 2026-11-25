@@ -16,7 +16,7 @@ export class ErrorApi extends Error {
     message: string,
     readonly estado: number,
     readonly campos: Record<string, string> = {},
-    /** Código fijo del backend, como EMAIL_TAKEN. Null si la respuesta no lo trae. */
+    /** Código fijo del backend, como INVALID_CREDENTIALS. Null si la respuesta no lo trae. */
     readonly codigo: string | null = null,
   ) {
     super(message);
@@ -39,7 +39,6 @@ export function alExpirarSesion(callback: () => void) {
  * así un cambio de redacción en el servidor no cambia lo que ve el usuario.
  */
 export const MENSAJES_POR_CODIGO: Record<string, string> = {
-  EMAIL_TAKEN: 'Ya hay una cuenta con ese email. Prueba a entrar.',
   INVALID_CREDENTIALS: 'El email o la contraseña no son correctos.',
   TOO_MANY_ATTEMPTS: 'Demasiados intentos. Espera unos minutos y vuelve a probar.',
   AI_DAILY_LIMIT: 'Has llegado al límite de usos de IA por hoy. Vuelve mañana.',
@@ -50,6 +49,10 @@ export const MENSAJES_POR_CODIGO: Record<string, string> = {
   NOT_FOUND: 'No se ha encontrado.',
   INTERNAL_ERROR: 'Ha fallado el servidor. Inténtalo de nuevo más tarde.',
 };
+
+/** Si el login tras registrarse falla, el email ya tenía cuenta con otra contraseña. No se dice cuál de las dos. */
+export const MENSAJE_REGISTRO_FALLIDO =
+  'No se ha podido crear la cuenta. Si ya tienes una con ese email, entra con tu contraseña.';
 
 /** Solo para respuestas sin code, como el 401 de un token caducado. */
 const MENSAJES: Record<number, string> = {
@@ -119,19 +122,32 @@ interface RespuestaToken {
   nombre: string;
 }
 
+async function login(email: string, password: string): Promise<Sesion> {
+  const r = await peticion<RespuestaToken>('/auth/login', { method: 'POST', body: json({ email, password }) });
+  return { token: r.token, usuarioId: r.usuarioId, nombre: r.nombre };
+}
+
 const apiServidor = {
   versionMinima: () => peticion<{ versionMinima: string }>('/version'),
 
-  async login(email: string, password: string): Promise<Sesion> {
-    const r = await peticion<RespuestaToken>('/auth/login', { method: 'POST', body: json({ email, password }) });
-    return { token: r.token, usuarioId: r.usuarioId, nombre: r.nombre };
-  },
+  login,
+  /**
+   * El backend responde igual exista o no el email, para no revelar quién tiene cuenta.
+   * Por eso el registro no trae token: se entra justo después con el login.
+   */
   async registro(nombre: string, email: string, password: string): Promise<Sesion> {
-    const r = await peticion<RespuestaToken>('/auth/registro', {
+    await peticion<{ mensaje: string }>('/auth/registro', {
       method: 'POST',
       body: json({ nombre, email, password }),
     });
-    return { token: r.token, usuarioId: r.usuarioId, nombre: r.nombre };
+    try {
+      return await login(email, password);
+    } catch (e) {
+      if (e instanceof ErrorApi && e.codigo === 'INVALID_CREDENTIALS') {
+        throw new ErrorApi(MENSAJE_REGISTRO_FALLIDO, e.estado, {}, e.codigo);
+      }
+      throw e;
+    }
   },
 
   candidaturas: (estado?: EstadoCandidatura) =>
@@ -143,6 +159,24 @@ const apiServidor = {
     peticion<Candidatura>(`/candidaturas/${id}`, { method: 'PUT', body: json(datos) }),
   borrarCandidatura: (id: number) => peticion<void>(`/candidaturas/${id}`, { method: 'DELETE' }),
 
+  /** Descarga en JSON todos los datos de la cuenta a la caché del móvil y devuelve su URI local. */
+  async exportarDatos(): Promise<string> {
+    const base = await cargarUrlServidor();
+    const fecha = new Date().toISOString().slice(0, 10);
+    const destino = new File(Paths.cache, `luz-verde-datos-${fecha}.json`);
+    if (destino.exists) {
+      destino.delete();
+    }
+    const tarea = File.createDownloadTask(`${base}${PREFIJO_API}/cuenta/exportacion`, destino, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    const archivo = await tarea.downloadAsync();
+    if (!archivo) {
+      throw new ErrorApi('La descarga no se ha completado.', 0);
+    }
+    return archivo.uri;
+  },
+
   /** Borra la cuenta y todos sus datos en el servidor. No se puede deshacer. */
   borrarCuenta: () => peticion<void>('/cuenta', { method: 'DELETE' }),
 
@@ -153,9 +187,12 @@ const apiServidor = {
     peticion<Evaluacion>('/evaluaciones', { method: 'POST', body: json({ ofertaTexto }) }),
   evaluaciones: () => peticion<EvaluacionResumen[]>('/evaluaciones'),
   evaluacion: (id: number) => peticion<Evaluacion>(`/evaluaciones/${id}`),
+  borrarEvaluacion: (id: number) => peticion<void>(`/evaluaciones/${id}`, { method: 'DELETE' }),
 
   generarCv: (ofertaTexto: string) => peticion<Cv>('/cv', { method: 'POST', body: json({ ofertaTexto }) }),
   cvs: () => peticion<Cv[]>('/cv'),
+  /** Borra el CV, su PDF, su Word y su carta. */
+  borrarCv: (id: number) => peticion<void>(`/cv/${id}`, { method: 'DELETE' }),
 
   /** Descarga el PDF o el DOCX a la caché del móvil y devuelve su URI local. */
   async descargarCv(cv: Cv, formato: 'pdf' | 'docx'): Promise<string> {

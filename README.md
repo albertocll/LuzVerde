@@ -11,6 +11,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Claude API](https://img.shields.io/badge/Claude_API-Haiku-D97757?logo=anthropic&logoColor=white)](https://docs.anthropic.com/)
 
+**Web:** [luzverde-empleo.netlify.app](https://luzverde-empleo.netlify.app/) · [Privacidad](https://luzverde-empleo.netlify.app/privacidad.html) · [Términos](https://luzverde-empleo.netlify.app/terminos.html) · [Borrar la cuenta](https://luzverde-empleo.netlify.app/borrar-cuenta.html)
+
 ![Luz Verde: candidaturas, evaluación de una oferta y CV adaptado](docs/img/mockup.png)
 
 ---
@@ -71,12 +73,12 @@ Entra con cualquier email y contraseña. El modo demo no entra en la build de pr
 ### Backend
 - **Lenguaje:** Java 21
 - **Framework:** Spring Boot 3.5 (Web, Data JPA, Security, Validation, Actuator)
-- **Base de datos:** PostgreSQL 17
+- **Base de datos:** PostgreSQL 17 con migraciones de Flyway
 - **Autenticación:** JWT (jjwt) con BCrypt
 - **IA:** API de Claude (`claude-haiku-5-5`) con salida forzada por herramienta y esquema JSON fijo
 - **Documentos:** OpenPDF para el PDF y Apache POI para el DOCX
 - **Documentación de la API:** OpenAPI con Swagger UI (springdoc)
-- **Tests:** JUnit 5, MockMvc y H2 en memoria, cobertura con JaCoCo
+- **Tests:** JUnit 5, MockMvc y PostgreSQL 17 real con Testcontainers, cobertura con JaCoCo
 
 ### App móvil
 - **Framework:** React Native 0.88 con Expo SDK 58
@@ -90,7 +92,7 @@ Entra con cualquier email y contraseña. El modo demo no entra en la build de pr
 - **CI:** GitHub Actions en cada push (tests del backend con cobertura mínima del 70 %, typecheck y tests de la app)
 - **Análisis:** CodeQL con consultas `security-extended`
 - **Secretos:** gitleaks en cada push
-- **Dependencias:** Dependabot semanal
+- **Dependencias:** Dependabot semanal y OWASP Dependency-Check cada lunes y en cada cambio del `pom.xml`
 
 ---
 
@@ -129,7 +131,7 @@ LuzVerde/
 │   └── src/demo/            API falsa del modo demo (solo web:demo)
 ├── docs/                    Arquitectura, decisiones, seguridad, interfaz y privacidad
 │   └── img/                 Mockup, GIF de la demo y capturas del README
-├── web/                     Página de presentación (Netlify)
+├── web/                     Página de presentación (luzverde-empleo.netlify.app)
 ├── .github/                 CI, CodeQL, Dependabot y plantillas
 ├── docker-compose.yml       PostgreSQL y backend para desarrollo local
 └── .env.example             Variables de entorno de ejemplo
@@ -196,6 +198,23 @@ En el emulador, `http://10.0.2.2:8080` apunta al backend de tu ordenador. La URL
 | `npm run typecheck` | Comprueba los tipos |
 | `npm test` | Ejecuta los tests |
 
+### Builds con EAS
+
+`mobile/eas.json` tiene tres perfiles:
+
+| Perfil | Sale | Entorno | Backend |
+|---|---|---|---|
+| `desarrollo` | APK | `desarrollo` | Se cambia desde la app |
+| `preview` | APK | `produccion` | Fijo, `EXPO_PUBLIC_API_URL` |
+| `production` | AAB para Google Play | `produccion` | Fijo, `EXPO_PUBLIC_API_URL` |
+
+En producción la app no enseña el campo Servidor y usa siempre la URL de la build. `EXPO_PUBLIC_API_URL` se crea en expo.dev (Environment variables) y tiene que ser `https`: si no, `scripts/comprobar-entorno.js` para la build antes de empezar.
+
+```bash
+cd mobile
+npx eas-cli build --platform android --profile production
+```
+
 ---
 
 ## 🧪 Tests
@@ -209,7 +228,7 @@ npm run typecheck
 npm test
 ```
 
-Los tests del backend usan H2 en memoria y simulan la API de Claude: no necesitan Docker, PostgreSQL ni créditos. El informe de cobertura queda en `backend/target/site/jacoco/index.html`.
+Los tests del backend arrancan un PostgreSQL 17 en Docker con Testcontainers, el mismo motor que en producción, y simulan la API de Claude. Necesitan Docker abierto, pero no créditos. El informe de cobertura queda en `backend/target/site/jacoco/index.html`.
 
 ![Informe de JaCoCo con la cobertura por paquete: 94 % de las líneas](docs/img/cobertura.png)
 
@@ -260,7 +279,7 @@ Todas las rutas salvo `/auth/**`, Swagger y `/actuator/health` piden la cabecera
 
 | Método | Ruta | Qué hace |
 |---|---|---|
-| POST | `/auth/registro` | Crea una cuenta y devuelve un token |
+| POST | `/auth/registro` | Crea una cuenta si el email está libre. Responde igual si ya existe y no devuelve token |
 | POST | `/auth/login` | Devuelve un token |
 | GET | `/candidaturas?estado=ENVIADA` | Lista tus candidaturas, con filtro opcional por estado |
 | GET | `/candidaturas/{id}` | Detalle de una candidatura |
@@ -305,6 +324,13 @@ Cada riesgo, su medida y el test que lo cubre están en [seguridad](docs/segurid
 | `ANTHROPIC_MODELO` | No | Modelo. Por defecto `claude-haiku-5-5` |
 | `ANTHROPIC_MAX_TOKENS` | No | Tope de tokens de salida por llamada. Por defecto 2048 |
 | `LIMITE_IA_DIARIO` | No | Usos de IA por usuario y día. Por defecto 10 |
+
+En la app (se fijan al construir):
+
+| Variable | Uso |
+|---|---|
+| `EXPO_PUBLIC_ENTORNO` | `desarrollo` (por defecto) o `produccion`. La ponen los perfiles de `eas.json` |
+| `EXPO_PUBLIC_API_URL` | URL del backend. Obligatoria y `https` en producción |
 
 ---
 

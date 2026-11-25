@@ -5,10 +5,17 @@ spring:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/luzverde}
     username: ${DB_USER:luzverde}
     password: ${DB_PASSWORD}
+  flyway:
+    # Las bases de datos creadas antes de Flyway (con ddl-auto: update) se marcan como
+    # versión 1 sin ejecutar V1, porque ya tienen esas tablas.
+    baseline-on-migrate: true
+    baseline-version: 1
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: update
+      # El esquema lo crean las migraciones de Flyway (db/migration). Hibernate solo comprueba
+      # al arrancar que las entidades coinciden con las tablas.
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: true
@@ -16,8 +23,10 @@ spring:
 server:
   port: ${PORT:8080}
   # En local no hay proxy: se ignora X-Forwarded-For para que nadie falsee su IP.
-  # Detrás del proxy de Railway se pone FORWARD_HEADERS_STRATEGY=native y el límite
-  # de login por IP usa la IP real del cliente.
+  # Detrás del proxy de Railway se pone FORWARD_HEADERS_STRATEGY=native y los límites
+  # de login y de registro por IP usan la IP real del cliente. Tomcat solo cree la
+  # cabecera si la petición llega desde una IP privada (la del proxy) y toma la última
+  # IP que no es de un proxy, así que un cliente no puede colar otra IP delante.
   forward-headers-strategy: ${FORWARD_HEADERS_STRATEGY:none}
   error:
     include-stacktrace: never

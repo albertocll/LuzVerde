@@ -11,5 +11,8 @@ public interface CvRepository extends JpaRepository<Cv, Long> {
 
     Optional<Cv> findByIdAndUsuarioId(Long id, Long usuarioId);
 
+    /** Todo el historial, para exportar los datos del usuario. */
+    List<Cv> findByUsuarioIdOrderByCreadoEnDesc(Long usuarioId);
+
     void deleteByUsuarioId(Long usuarioId);
 }

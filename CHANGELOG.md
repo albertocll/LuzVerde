@@ -6,11 +6,18 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ### añadido
 
+- Exportar mis datos desde Perfil: un JSON con todo lo guardado de la cuenta (`GET /api/v1/cuenta/exportacion`).
+- Entornos de la app (`EXPO_PUBLIC_ENTORNO`) y `eas.json` con perfiles `desarrollo`, `preview` y `production`. En producción la URL del backend es fija y tiene que ser https.
+- Borrar evaluaciones y CV del historial (`DELETE /api/v1/evaluaciones/{id}` y `DELETE /api/v1/cv/{id}`), con botón en la app.
 - Vista previa web de la app y modo demo con datos inventados (`npm run web:demo`), fuera de la build de producción.
 - README con mockup, capturas y diagrama de arquitectura.
 - GIF de la demo, CV en PDF de ejemplo, Swagger UI e informe de cobertura en el README.
 - Borrar la cuenta y todos sus datos desde Perfil (`DELETE /api/v1/cuenta`). El token de una cuenta borrada deja de valer.
 - Aviso de "Hay una versión nueva" cuando la app es más antigua que `APP_VERSION_MINIMA` (`GET /api/v1/version`).
+- Páginas web de privacidad, términos de uso y borrado de cuenta, enlazadas desde la landing.
+- OWASP Dependency-Check en GitHub Actions: cada lunes y en cada cambio del `pom.xml`. Falla con vulnerabilidades de CVSS 7 o más.
+- Límite de registros: 10 peticiones por IP y hora.
+- Tests con Tomcat real de la IP del cliente detrás del proxy (`X-Forwarded-For`).
 
 - Límite de intentos de login: 5 fallos por email o 20 por IP en 15 minutos.
 - Endpoint `/actuator/health` para el despliegue.
@@ -25,11 +32,15 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ### cambiado
 
+- El esquema de la base de datos sale de migraciones de Flyway. Hibernate ya no crea tablas, solo las valida. Las bases existentes se adoptan como versión 1 sin perder datos.
+- Los tests del backend corren contra PostgreSQL 17 real con Testcontainers en lugar de H2. Necesitan Docker.
 - La API pasa a `/api/v1`. La app ya usa las rutas nuevas.
-- Cada respuesta de error lleva un `code` fijo (`EMAIL_TAKEN`, `AI_DAILY_LIMIT`...). La app elige su mensaje por él, así que un 429 del login ya no dice que se acabó la IA.
+- El registro responde `202` con el mismo mensaje exista o no el email, y ya no devuelve token. La app entra justo después con el login.
+- Cada respuesta de error lleva un `code` fijo (`INVALID_CREDENTIALS`, `AI_DAILY_LIMIT`...). La app elige su mensaje por él, así que un 429 del login ya no dice que se acabó la IA.
 
 ### seguridad
 
+- El registro ya no revela si un email tiene cuenta. Desaparece el `409 EMAIL_TAKEN` y el tiempo de respuesta es parecido en los dos casos.
 - Swagger queda apagado salvo con `SWAGGER_ENABLED=true`. Docker Compose local lo activa.
 - El token JWT lleva emisor y destinatario, y el backend los comprueba.
 - El límite de login borra las claves caducadas para que probar miles de emails no llene la memoria.
