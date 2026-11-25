@@ -187,9 +187,12 @@ const apiServidor = {
     peticion<Evaluacion>('/evaluaciones', { method: 'POST', body: json({ ofertaTexto }) }),
   evaluaciones: () => peticion<EvaluacionResumen[]>('/evaluaciones'),
   evaluacion: (id: number) => peticion<Evaluacion>(`/evaluaciones/${id}`),
+  borrarEvaluacion: (id: number) => peticion<void>(`/evaluaciones/${id}`, { method: 'DELETE' }),
 
   generarCv: (ofertaTexto: string) => peticion<Cv>('/cv', { method: 'POST', body: json({ ofertaTexto }) }),
   cvs: () => peticion<Cv[]>('/cv'),
+  /** Borra el CV, su PDF, su Word y su carta. */
+  borrarCv: (id: number) => peticion<void>(`/cv/${id}`, { method: 'DELETE' }),
 
   /** Descarga el PDF o el DOCX a la caché del móvil y devuelve su URI local. */
   async descargarCv(cv: Cv, formato: 'pdf' | 'docx'): Promise<string> {

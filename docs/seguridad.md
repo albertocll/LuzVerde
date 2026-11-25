@@ -39,5 +39,4 @@ La app guarda nombre, email, contraseña (solo su hash BCrypt), perfil profesion
 - Verificar el email al registrarse. Hoy alguien puede registrar un email ajeno, intentar entrar con su contraseña y deducir por el fallo que el email ya tenía cuenta. El límite del login (5 fallos por email, 20 por IP en 15 minutos) frena esa vía, pero cerrarla del todo pide mandar un enlace por correo, y eso necesita un proveedor de email.
 - Forzar HTTPS en producción. Railway lo sirve por HTTPS y la app debe apuntar a esa URL (fase 5).
 - Poner `FORWARD_HEADERS_STRATEGY=native` en Railway, para que los límites por IP usen la IP real (fase 5). El código ya está probado con Tomcat real; falta la variable en el despliegue.
-- Cambiar `ddl-auto: update` por migraciones con Flyway antes de tener datos reales.
 - Revisar la política de privacidad ([borrador](privacidad.md)) antes de publicar.

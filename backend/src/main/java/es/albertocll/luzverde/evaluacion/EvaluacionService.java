@@ -123,9 +123,19 @@ public class EvaluacionService {
 
     @Transactional(readOnly = true)
     public EvaluacionResponse obtener(Long usuarioId, Long id) {
-        Evaluacion evaluacion = evaluaciones.findByIdAndUsuarioId(id, usuarioId)
+        return EvaluacionResponse.de(buscar(usuarioId, id), restantes(usuarioId));
+    }
+
+    /** Borrar no devuelve el uso de IA del día: el límite cuenta las llamadas hechas, no las guardadas. */
+    @Transactional
+    public void borrar(Long usuarioId, Long id) {
+        evaluaciones.delete(buscar(usuarioId, id));
+    }
+
+    // Si la evaluación es de otro usuario, respondemos igual que si no existiera.
+    private Evaluacion buscar(Long usuarioId, Long id) {
+        return evaluaciones.findByIdAndUsuarioId(id, usuarioId)
                 .orElseThrow(() -> new NoEncontradoException("Evaluación no encontrada"));
-        return EvaluacionResponse.de(evaluacion, restantes(usuarioId));
     }
 
     private long restantes(Long usuarioId) {

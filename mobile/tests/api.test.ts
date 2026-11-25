@@ -166,4 +166,18 @@ describe('api', () => {
     expect(url).toBe('http://servidor.test/api/v1/cuenta/exportacion');
     expect(opciones.headers.Authorization).toBe('Bearer mi-token');
   });
+
+  it('borra evaluaciones y CV con DELETE', async () => {
+    fijarToken('t');
+    fetchSimulado.mockResolvedValue(respuesta(204));
+
+    await api.borrarEvaluacion(7);
+    await api.borrarCv(9);
+
+    const urls = fetchSimulado.mock.calls.map(([url, opciones]: [string, RequestInit]) => `${opciones.method} ${url}`);
+    expect(urls).toEqual([
+      'DELETE http://servidor.test/api/v1/evaluaciones/7',
+      'DELETE http://servidor.test/api/v1/cv/9',
+    ]);
+  });
 });
