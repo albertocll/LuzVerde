@@ -47,6 +47,10 @@ export const apiDemo: typeof apiReal = {
     return pausa(undefined);
   },
 
+  exportarDatos: async () => {
+    throw new ErrorApi('En el modo demo no se descargan archivos.', 0);
+  },
+
   borrarCuenta: async () => {
     candidaturas = [];
     evaluaciones = [];

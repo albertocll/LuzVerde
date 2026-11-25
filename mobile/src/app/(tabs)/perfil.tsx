@@ -1,3 +1,4 @@
+import * as Sharing from 'expo-sharing';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState, type ReactNode } from 'react';
 import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -47,6 +48,7 @@ export default function PantallaPerfil() {
   const [guardando, setGuardando] = useState(false);
   const [guardado, setGuardado] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [exportando, setExportando] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -167,6 +169,23 @@ export default function PantallaPerfil() {
     const nueva = await guardarUrlServidor(url);
     setUrl(nueva);
     Alert.alert('Servidor guardado', nueva);
+  };
+
+  const exportar = async () => {
+    setError(null);
+    setExportando(true);
+    try {
+      const uri = await api.exportarDatos();
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, { mimeType: 'application/json', dialogTitle: 'Guardar o compartir tus datos' });
+      } else {
+        Alert.alert('Datos exportados', `Guardados en ${uri}`);
+      }
+    } catch (e) {
+      setError(e instanceof ErrorApi ? e.message : 'No se han podido exportar los datos.');
+    } finally {
+      setExportando(false);
+    }
   };
 
   const confirmarBorrado = () =>
@@ -392,6 +411,14 @@ export default function PantallaPerfil() {
       ) : null}
 
       <Boton titulo="Cerrar sesión" icono="log-out-outline" variante="peligro" alPulsar={cerrarSesion} estilo={{ marginTop: espacio.xl }} />
+      <Boton
+        titulo="Exportar mis datos"
+        icono="download-outline"
+        variante="texto"
+        alPulsar={exportar}
+        cargando={exportando}
+        estilo={{ marginTop: espacio.m }}
+      />
       <Boton
         titulo="Borrar cuenta y datos"
         icono="trash-outline"
