@@ -20,14 +20,12 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -185,24 +183,6 @@ class CvIntegrationTest extends TestBase {
                 .andExpect(status().isNotFound());
         mvc.perform(get("/api/v1/cv/{id}", id).header(HttpHeaders.AUTHORIZATION, bearer(otro)))
                 .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void borrarUnCvQuitaTambienSusArchivos() throws Exception {
-        String token = usuarioConPerfil();
-        long id = generar(token);
-
-        mvc.perform(delete("/api/v1/cv/{id}", id).header(HttpHeaders.AUTHORIZATION, bearer(registrar())))
-                .andExpect(status().isNotFound());
-
-        mvc.perform(delete("/api/v1/cv/{id}", id).header(HttpHeaders.AUTHORIZATION, bearer(token)))
-                .andExpect(status().isNoContent());
-        mvc.perform(get("/api/v1/cv/{id}/pdf", id).header(HttpHeaders.AUTHORIZATION, bearer(token)))
-                .andExpect(status().isNotFound());
-        mvc.perform(get("/api/v1/cv/{id}/docx", id).header(HttpHeaders.AUTHORIZATION, bearer(token)))
-                .andExpect(status().isNotFound());
-        mvc.perform(get("/api/v1/cv").header(HttpHeaders.AUTHORIZATION, bearer(token)))
-                .andExpect(jsonPath("$", hasSize(0)));
     }
 
     @Test

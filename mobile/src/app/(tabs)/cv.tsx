@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Sharing from 'expo-sharing';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import { api, ErrorApi } from '@/api';
 import { AvisoError, Boton, Campo, Cargando, ListaPuntos, Pantalla, Seccion, Tarjeta, Vacio } from '@/componentes/ui';
 import { fechaCorta } from '@/formato';
@@ -75,26 +75,6 @@ export default function PantallaCv() {
   };
 
   const compartirCarta = (carta: string) => Share.share({ message: carta });
-
-  const borrar = (cv: Cv) => {
-    const nombre = [cv.puesto, cv.empresa].filter(Boolean).join(' en ') || 'este CV';
-    Alert.alert('Borrar CV', `¿Seguro que quieres borrar ${nombre}? Se borran el PDF, el Word y la carta.`, [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Borrar',
-        style: 'destructive',
-        onPress: async () => {
-          setError(null);
-          try {
-            await api.borrarCv(cv.id);
-            setLista((l) => (l ?? []).filter((x) => x.id !== cv.id));
-          } catch (e) {
-            setError(e instanceof ErrorApi ? e.message : 'No se ha podido borrar el CV.');
-          }
-        },
-      },
-    ]);
-  };
 
   return (
     <Pantalla titulo="CV adaptado" subtitulo="Un CV para cada oferta, sin inventar nada.">
@@ -187,12 +167,6 @@ export default function PantallaCv() {
                           </View>
                         </View>
                       ) : null}
-                      <Boton
-                        titulo="Borrar CV"
-                        icono="trash-outline"
-                        variante="peligro"
-                        alPulsar={() => borrar(cv)}
-                      />
                     </View>
                   ) : null}
                 </Tarjeta>

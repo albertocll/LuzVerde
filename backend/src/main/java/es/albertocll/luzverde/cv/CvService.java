@@ -166,11 +166,6 @@ public class CvService {
         return buscar(usuarioId, id).getDocx();
     }
 
-    @Transactional
-    public void borrar(Long usuarioId, Long id) {
-        cvs.delete(buscar(usuarioId, id));
-    }
-
     private Cv buscar(Long usuarioId, Long id) {
         return cvs.findByIdAndUsuarioId(id, usuarioId)
                 .orElseThrow(() -> new NoEncontradoException("CV no encontrado"));
