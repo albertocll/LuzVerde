@@ -92,7 +92,7 @@ Entra con cualquier email y contraseña. El modo demo no entra en la build de pr
 - **CI:** GitHub Actions en cada push (tests del backend con cobertura mínima del 70 %, typecheck y tests de la app)
 - **Análisis:** CodeQL con consultas `security-extended`
 - **Secretos:** gitleaks en cada push
-- **Dependencias:** Dependabot semanal
+- **Dependencias:** Dependabot semanal y OWASP Dependency-Check cada lunes y en cada cambio del `pom.xml`
 
 ---
 
