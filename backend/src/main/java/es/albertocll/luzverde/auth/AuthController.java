@@ -26,16 +26,20 @@ public class AuthController {
             "Si el email no tenía cuenta, ya está creada. Entra con tu email y contraseña.";
 
     private final AuthService authService;
+    private final LimiteRegistroService limiteRegistro;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, LimiteRegistroService limiteRegistro) {
         this.authService = authService;
+        this.limiteRegistro = limiteRegistro;
     }
 
     @PostMapping("/registro")
     @ResponseStatus(HttpStatus.ACCEPTED)
     @Operation(summary = "Crea una cuenta si el email está libre",
-            description = "Responde lo mismo exista o no el email. Para obtener el token, llama después a /login.")
-    public RegistroResponse registro(@Valid @RequestBody RegistroRequest peticion) {
+            description = "Responde lo mismo exista o no el email. Para obtener el token, llama después a /login. "
+                    + "Como mucho 10 peticiones por IP y hora.")
+    public RegistroResponse registro(@Valid @RequestBody RegistroRequest peticion, HttpServletRequest request) {
+        limiteRegistro.comprobarYRegistrar(request.getRemoteAddr());
         authService.registrar(peticion);
         return new RegistroResponse(MENSAJE_REGISTRO);
     }
