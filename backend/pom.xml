@@ -22,7 +22,7 @@
         <jjwt.version>0.13.0</jjwt.version>
         <springdoc.version>2.8.9</springdoc.version>
         <openpdf.version>3.0.6</openpdf.version>
-        <poi.version>5.4.1</poi.version>
+        <poi.version>6.0.0</poi.version>
         <pdfbox.version>3.0.8</pdfbox.version>
         <!-- La 1.21.3 que trae Spring Boot no habla con Docker 29 (API mínima 1.40). -->
         <testcontainers.version>1.21.4</testcontainers.version>
