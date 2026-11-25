@@ -128,7 +128,7 @@ export default function Candidaturas() {
 
 function Dato({ numero, etiqueta, destacado }: { numero: number; etiqueta: string; destacado?: boolean }) {
   return (
-    <View style={[estilos.dato, destacado && { backgroundColor: color.primarioOscuro }]}>
+    <View style={[estilos.dato, destacado && { backgroundColor: color.relleno }]}>
       <Text style={[estilos.datoNumero, destacado && { color: color.blanco }]}>{numero}</Text>
       <Text style={[estilos.datoEtiqueta, destacado && { color: '#A7F3D0' }]}>{etiqueta}</Text>
     </View>

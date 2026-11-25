@@ -32,9 +32,15 @@ Hasta que el perfil está al 65 %, las pestañas Candidaturas y Evaluar muestran
 - La barra de progreso del perfil expone su valor.
 - Áreas táctiles de 40 px o más y texto base de 15 px.
 
+## modo oscuro
+
+La app sigue el tema del sistema al abrirse (`userInterfaceStyle: automatic`). `src/tema.ts` tiene dos paletas con los mismos nombres de color, y `tests/tema.test.ts` comprueba sus contrastes: texto principal AAA, texto secundario y verde de títulos AA. Si el usuario cambia el tema con la app abierta, se aplica la próxima vez que la abra, porque los estilos se crean al cargar cada pantalla.
+
+![Candidaturas en modo oscuro](img/modo-oscuro.png)
+
 ## pendiente de revisar en un dispositivo
 
 - Contraste de los textos tenues sobre fondo claro con una herramienta de contraste.
 - Navegación completa con TalkBack.
 - Pantallas pequeñas (360 px de ancho), sobre todo la fila de niveles del stack en Perfil.
-- Modo oscuro.
+- Modo oscuro en un Android real (probado solo en la web del modo demo).

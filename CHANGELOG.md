@@ -6,6 +6,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ### añadido
 
+- Modo oscuro que sigue el tema del sistema al abrir la app.
 - Selector de fecha nativo en candidaturas. En la web del modo demo sigue el campo de texto.
 - Flujos de Maestro en `mobile/.maestro`: login, candidatura y evaluación de oferta.
 - Exportar mis datos desde Perfil: un JSON con todo lo guardado de la cuenta (`GET /api/v1/cuenta/exportacion`).

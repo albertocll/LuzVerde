@@ -202,7 +202,7 @@ export function Chip({
   activo,
   alPulsar,
   colorActivo = color.primarioOscuro,
-  fondoActivo = color.primarioOscuro,
+  fondoActivo = color.relleno,
 }: {
   texto: string;
   activo: boolean;
@@ -217,13 +217,13 @@ export function Chip({
       accessibilityState={{ selected: activo }}
       style={[
         estilos.chip,
-        activo && { backgroundColor: fondoActivo, borderColor: fondoActivo === color.primarioOscuro ? fondoActivo : colorActivo },
+        activo && { backgroundColor: fondoActivo, borderColor: fondoActivo === color.relleno ? fondoActivo : colorActivo },
       ]}
     >
       <Text
         style={[
           estilos.chipTexto,
-          activo && { color: fondoActivo === color.primarioOscuro ? color.blanco : colorActivo },
+          activo && { color: fondoActivo === color.relleno ? color.blanco : colorActivo },
         ]}
       >
         {etiqueta}

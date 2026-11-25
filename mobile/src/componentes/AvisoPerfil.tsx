@@ -76,7 +76,7 @@ const estilos = StyleSheet.create({
   barra: {
     height: 6,
     borderRadius: 3,
-    backgroundColor: 'rgba(15,61,46,0.12)',
+    backgroundColor: color.primarioTenue,
     marginTop: espacio.s,
     overflow: 'hidden',
   },

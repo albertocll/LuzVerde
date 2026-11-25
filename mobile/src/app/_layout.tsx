@@ -3,13 +3,13 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ProveedorAuth } from '@/auth';
 import { ComprobadorVersion } from '@/componentes/AvisoActualizar';
-import { color } from '@/tema';
+import { color, ESQUEMA } from '@/tema';
 
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ProveedorAuth>
-        <StatusBar style="dark" />
+        <StatusBar style={ESQUEMA === 'oscuro' ? 'light' : 'dark'} />
         <ComprobadorVersion>
           <Stack
             screenOptions={{

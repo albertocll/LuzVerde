@@ -35,7 +35,7 @@ export function ResultadoEvaluacion({
       {e.resumen ? <Text style={texto.cuerpo}>{e.resumen}</Text> : null}
 
       {e.accionRecomendada ? (
-        <Tarjeta estilo={{ backgroundColor: color.primarioOscuro, borderColor: color.primarioOscuro }}>
+        <Tarjeta estilo={{ backgroundColor: color.relleno, borderColor: color.relleno }}>
           <Text style={{ color: '#A7F3D0', fontWeight: '700', fontSize: 13, marginBottom: 4 }}>Qué hacer ahora</Text>
           <Text style={{ color: color.blanco, fontSize: 15, lineHeight: 21 }}>{e.accionRecomendada}</Text>
         </Tarjeta>
